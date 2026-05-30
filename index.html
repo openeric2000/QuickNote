@@ -1,0 +1,1642 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickNote 客戶備忘錄</title>
+    <style>
+        :root {
+            color-scheme: light;
+            --bg: #f7f1e8;
+            --bg-accent: #efe3d1;
+            --surface: rgba(255, 252, 248, 0.9);
+            --surface-strong: #fffdf9;
+            --surface-muted: #f5ecdf;
+            --text: #2f261f;
+            --text-soft: #67584d;
+            --primary: #a14f2a;
+            --primary-strong: #7c3817;
+            --primary-soft: #f6d9c7;
+            --secondary: #2f6f68;
+            --secondary-soft: #d5ece6;
+            --danger: #9d2d2d;
+            --danger-soft: #f8d7d7;
+            --border: rgba(95, 69, 53, 0.18);
+            --shadow-lg: 0 30px 60px rgba(88, 55, 37, 0.14);
+            --shadow-md: 0 16px 32px rgba(88, 55, 37, 0.1);
+            --radius-xl: 28px;
+            --radius-lg: 20px;
+            --radius-md: 14px;
+            --radius-sm: 10px;
+            --space-1: 0.5rem;
+            --space-2: 0.75rem;
+            --space-3: 1rem;
+            --space-4: 1.25rem;
+            --space-5: 1.5rem;
+            --space-6: 2rem;
+            --space-7: 2.5rem;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            min-height: 100%;
+            font-family: "Noto Sans TC", "Microsoft JhengHei", "Segoe UI", sans-serif;
+            background:
+                radial-gradient(circle at top left, rgba(255, 220, 184, 0.9), transparent 35%),
+                radial-gradient(circle at top right, rgba(165, 220, 210, 0.45), transparent 30%),
+                linear-gradient(180deg, #fbf6ef 0%, #f2e6d6 100%);
+            color: var(--text);
+        }
+
+        body {
+            padding: var(--space-5);
+        }
+
+        button,
+        input,
+        select,
+        textarea {
+            font: inherit;
+        }
+
+        button {
+            cursor: pointer;
+        }
+
+        .shell {
+            width: min(1240px, 100%);
+            margin: 0 auto;
+            display: grid;
+            gap: var(--space-5);
+        }
+
+        .hero {
+            display: grid;
+            gap: var(--space-4);
+            padding: clamp(1.5rem, 4vw, 2.5rem);
+            background: linear-gradient(135deg, rgba(255, 251, 247, 0.92), rgba(245, 230, 210, 0.92));
+            border: 1px solid rgba(161, 79, 42, 0.15);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::after {
+            content: "";
+            position: absolute;
+            inset: auto -4rem -4rem auto;
+            width: 16rem;
+            height: 16rem;
+            background: radial-gradient(circle, rgba(47, 111, 104, 0.24), transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-header {
+            display: flex;
+            justify-content: space-between;
+            gap: var(--space-4);
+            align-items: start;
+            flex-wrap: wrap;
+        }
+
+        .hero-copy {
+            max-width: 40rem;
+            display: grid;
+            gap: var(--space-2);
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            width: fit-content;
+            padding: 0.45rem 0.8rem;
+            border-radius: 999px;
+            background: rgba(161, 79, 42, 0.09);
+            color: var(--primary-strong);
+            font-size: 0.92rem;
+            font-weight: 700;
+            letter-spacing: 0.04em;
+        }
+
+        h1,
+        h2,
+        h3,
+        p {
+            margin: 0;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 4vw, 3.15rem);
+            line-height: 1.08;
+            letter-spacing: -0.03em;
+        }
+
+        .hero-copy p {
+            color: var(--text-soft);
+            font-size: 1.02rem;
+            line-height: 1.75;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-2);
+            justify-content: flex-end;
+            align-items: start;
+        }
+
+        .stats-grid,
+        .layout-grid {
+            display: grid;
+            gap: var(--space-4);
+        }
+
+        .stats-grid {
+            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+        }
+
+        .layout-grid {
+            grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
+            align-items: start;
+        }
+
+        .card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+            -webkit-backdrop-filter: blur(16px);
+            backdrop-filter: blur(16px);
+        }
+
+        .stat-card {
+            padding: var(--space-4);
+            display: grid;
+            gap: 0.35rem;
+        }
+
+        .stat-card .label {
+            color: var(--text-soft);
+            font-size: 0.92rem;
+        }
+
+        .stat-card strong {
+            font-size: clamp(1.5rem, 3vw, 2rem);
+        }
+
+        .panel {
+            padding: var(--space-5);
+            display: grid;
+            gap: var(--space-4);
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            gap: var(--space-3);
+            align-items: start;
+            flex-wrap: wrap;
+        }
+
+        .panel-header p {
+            color: var(--text-soft);
+            line-height: 1.7;
+        }
+
+        .form-grid {
+            display: grid;
+            gap: var(--space-3);
+        }
+
+        .form-grid.two-columns {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .field {
+            display: grid;
+            gap: 0.45rem;
+        }
+
+        .field label,
+        .field legend {
+            font-weight: 700;
+            font-size: 0.95rem;
+        }
+
+        .field input,
+        .field select,
+        .field textarea,
+        .search-input {
+            width: 100%;
+            min-height: 3rem;
+            padding: 0.85rem 1rem;
+            border: 1px solid rgba(103, 88, 77, 0.18);
+            border-radius: var(--radius-md);
+            background: var(--surface-strong);
+            color: var(--text);
+            transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+        }
+
+        .field textarea {
+            min-height: 8rem;
+            resize: vertical;
+        }
+
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus,
+        .search-input:focus {
+            border-color: rgba(47, 111, 104, 0.55);
+            box-shadow: 0 0 0 4px rgba(47, 111, 104, 0.14);
+            outline: none;
+            transform: translateY(-1px);
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.7rem;
+            padding: 0;
+            border: 0;
+            margin: 0;
+        }
+
+        .checkbox-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            padding: 0.75rem 0.95rem;
+            min-height: 44px;
+            border-radius: 999px;
+            border: 1px solid rgba(161, 79, 42, 0.18);
+            background: rgba(255, 255, 255, 0.75);
+            color: var(--text);
+        }
+
+        .checkbox-chip input {
+            width: 1rem;
+            height: 1rem;
+            accent-color: var(--secondary);
+            margin: 0;
+        }
+
+        .button-row,
+        .toolbar,
+        .record-actions,
+        .settings-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-2);
+            align-items: center;
+        }
+
+        .button-row {
+            justify-content: flex-start;
+        }
+
+        .button,
+        .ghost-button,
+        .danger-button,
+        .icon-button {
+            min-height: 44px;
+            padding: 0.85rem 1.15rem;
+            border: 0;
+            border-radius: 999px;
+            font-weight: 700;
+            transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
+        }
+
+        .button {
+            background: linear-gradient(135deg, var(--primary), var(--primary-strong));
+            color: #fff;
+            box-shadow: 0 14px 30px rgba(124, 56, 23, 0.2);
+        }
+
+        .ghost-button {
+            background: rgba(255, 255, 255, 0.78);
+            color: var(--text);
+            border: 1px solid rgba(103, 88, 77, 0.16);
+        }
+
+        .danger-button {
+            background: var(--danger-soft);
+            color: var(--danger);
+        }
+
+        .icon-button {
+            padding-inline: 1rem;
+            background: rgba(47, 111, 104, 0.1);
+            color: var(--secondary);
+        }
+
+        .button:hover,
+        .ghost-button:hover,
+        .danger-button:hover,
+        .icon-button:hover {
+            transform: translateY(-2px);
+        }
+
+        .button:focus-visible,
+        .ghost-button:focus-visible,
+        .danger-button:focus-visible,
+        .icon-button:focus-visible {
+            outline: 3px solid rgba(47, 111, 104, 0.25);
+            outline-offset: 2px;
+        }
+
+        .toolbar {
+            justify-content: space-between;
+        }
+
+        .toolbar-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: var(--space-2);
+        }
+
+        .search-stack {
+            display: grid;
+            gap: var(--space-3);
+        }
+
+        .storage-status {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.65rem;
+            width: fit-content;
+            padding: 0.7rem 0.95rem;
+            border-radius: 999px;
+            background: rgba(47, 111, 104, 0.08);
+            color: var(--secondary);
+            font-size: 0.95rem;
+            font-weight: 700;
+        }
+
+        .storage-status.warn {
+            background: rgba(161, 79, 42, 0.1);
+            color: var(--primary-strong);
+        }
+
+        .storage-status.error {
+            background: rgba(157, 45, 45, 0.11);
+            color: var(--danger);
+        }
+
+        .results-meta {
+            color: var(--text-soft);
+        }
+
+        .records-grid {
+            display: grid;
+            gap: var(--space-3);
+        }
+
+        .record-card {
+            display: grid;
+            gap: var(--space-3);
+            padding: var(--space-4);
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(161, 79, 42, 0.14);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 249, 241, 0.92));
+            box-shadow: 0 14px 28px rgba(88, 55, 37, 0.08);
+            transition: transform 180ms ease, box-shadow 180ms ease;
+        }
+
+        .record-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 24px 36px rgba(88, 55, 37, 0.12);
+        }
+
+        .record-top {
+            display: flex;
+            justify-content: space-between;
+            gap: var(--space-3);
+            align-items: start;
+            flex-wrap: wrap;
+        }
+
+        .record-title {
+            display: grid;
+            gap: 0.35rem;
+        }
+
+        .record-title small,
+        .record-note,
+        .empty-state p,
+        .settings-help,
+        .hint {
+            color: var(--text-soft);
+        }
+
+        .record-title h3 {
+            font-size: 1.3rem;
+        }
+
+        .record-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.55rem;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            min-height: 36px;
+            padding: 0.4rem 0.85rem;
+            border-radius: 999px;
+            font-size: 0.92rem;
+            font-weight: 700;
+            background: var(--secondary-soft);
+            color: var(--secondary);
+        }
+
+        .pill.muted {
+            background: rgba(103, 88, 77, 0.1);
+            color: var(--text-soft);
+        }
+
+        .record-note {
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            background: var(--surface-muted);
+            line-height: 1.7;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .record-item {
+            padding: 1rem;
+            border-radius: var(--radius-md);
+            background: rgba(161, 79, 42, 0.08);
+            line-height: 1.7;
+            font-weight: 700;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .empty-state {
+            padding: clamp(2rem, 5vw, 3.2rem);
+            border-radius: var(--radius-lg);
+            border: 1px dashed rgba(103, 88, 77, 0.25);
+            background: rgba(255, 255, 255, 0.52);
+            text-align: center;
+            display: grid;
+            gap: 0.65rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.35rem;
+        }
+
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-4);
+            background: rgba(38, 27, 18, 0.42);
+            -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+            z-index: 20;
+        }
+
+        .overlay[data-open="true"] {
+            display: flex;
+        }
+
+        .modal {
+            width: min(720px, 100%);
+            padding: var(--space-5);
+            border-radius: var(--radius-xl);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 239, 228, 0.97));
+            border: 1px solid rgba(161, 79, 42, 0.16);
+            box-shadow: var(--shadow-lg);
+            display: grid;
+            gap: var(--space-4);
+        }
+
+        .settings-list {
+            display: grid;
+            gap: var(--space-2);
+            max-height: 320px;
+            overflow: auto;
+            padding-right: 0.35rem;
+        }
+
+        .settings-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: var(--space-2);
+            padding: 0.8rem 1rem;
+            border-radius: var(--radius-md);
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(103, 88, 77, 0.12);
+        }
+
+        .settings-item span {
+            font-weight: 700;
+        }
+
+        .inline-form {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: var(--space-2);
+        }
+
+        @media (max-width: 960px) {
+            body {
+                padding: var(--space-3);
+            }
+
+            .layout-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .hero-header,
+            .toolbar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .hero-actions,
+            .toolbar-group {
+                justify-content: flex-start;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .panel,
+            .modal {
+                padding: var(--space-4);
+            }
+
+            .form-grid.two-columns,
+            .inline-form {
+                grid-template-columns: 1fr;
+            }
+
+            .record-top,
+            .settings-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .record-actions {
+                justify-content: stretch;
+            }
+
+            .record-actions button,
+            .toolbar-group button,
+            .hero-actions button,
+            .button-row button,
+            .settings-item button,
+            .inline-form button {
+                width: 100%;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation: none !important;
+                transition: none !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <section class="hero" aria-labelledby="page-title">
+            <div class="hero-header">
+                <div class="hero-copy">
+                    <span class="eyebrow">QuickNote / 客戶備忘錄</span>
+                    <h1 id="page-title">把客戶、地址、送貨方式與備註集中在同一頁。</h1>
+                    <p>直接用瀏覽器打開這個單一 HTML 檔即可使用。除了客戶、地址與送貨方式，也能記錄哪一天要出什麼貨，再把資料寫進桌面 JSON 檔，不依賴 SQL。</p>
+                </div>
+                <div class="hero-actions" aria-label="資料操作">
+                    <button class="ghost-button" type="button" id="openFileButton">開啟資料檔</button>
+                    <button class="ghost-button" type="button" id="saveAsButton">另存資料檔</button>
+                    <button class="button" type="button" id="saveButton">存檔</button>
+                    <button class="ghost-button" type="button" id="exportButton">匯出 JSON</button>
+                    <button class="ghost-button" type="button" id="importButton">匯入 JSON</button>
+                    <button class="icon-button" type="button" id="settingsButton" aria-haspopup="dialog" aria-controls="settingsOverlay">送貨方式設定</button>
+                </div>
+            </div>
+            <div class="stats-grid" aria-label="資料摘要">
+                <article class="stat-card card">
+                    <span class="label">目前總筆數</span>
+                    <strong id="totalCount">0</strong>
+                </article>
+                <article class="stat-card card">
+                    <span class="label">搜尋後顯示</span>
+                    <strong id="filteredCount">0</strong>
+                </article>
+                <article class="stat-card card">
+                    <span class="label">送貨方式選項</span>
+                    <strong id="shippingCount">0</strong>
+                </article>
+                <article class="stat-card card">
+                    <span class="label">最後更新時間</span>
+                    <strong id="lastUpdated">尚未建立</strong>
+                </article>
+            </div>
+        </section>
+
+        <div class="layout-grid">
+            <section class="panel card" aria-labelledby="form-title">
+                <div class="panel-header">
+                    <div>
+                        <h2 id="form-title">新增紀錄</h2>
+                        <p>用來快速記住哪一天要出什麼貨、送到哪裡、用什麼方式送，再補上備註。</p>
+                    </div>
+                    <div class="storage-status warn" id="storageStatus">目前只存在瀏覽器暫存</div>
+                </div>
+
+                <form id="recordForm" class="form-grid" novalidate>
+                    <div class="form-grid two-columns">
+                        <div class="field">
+                            <label for="customerName">客戶名</label>
+                            <input id="customerName" name="customerName" autocomplete="off" placeholder="例如：王小姐" required>
+                        </div>
+                        <div class="field">
+                            <label for="deliveryDate">出貨日期</label>
+                            <input id="deliveryDate" name="deliveryDate" type="date" required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="itemInput">貨品內容</label>
+                        <textarea id="itemInput" name="itemInput" placeholder="例如：中秋禮盒 3 組、常溫兩箱" required></textarea>
+                    </div>
+
+                    <div class="form-grid two-columns">
+                        <div class="field">
+                            <label for="citySelect">縣市</label>
+                            <select id="citySelect" name="citySelect" required></select>
+                        </div>
+                        <div class="field">
+                            <label for="districtSelect">行政區</label>
+                            <select id="districtSelect" name="districtSelect" required disabled></select>
+                        </div>
+                    </div>
+
+                    <fieldset class="field">
+                        <legend>送貨方式</legend>
+                        <div id="shippingOptions" class="checkbox-group" role="group" aria-label="送貨方式選項"></div>
+                        <p class="hint">若要新增或刪除送貨方式，請點右上角「送貨方式設定」。</p>
+                    </fieldset>
+
+                    <div class="field">
+                        <label for="noteInput">備註</label>
+                        <textarea id="noteInput" name="noteInput" placeholder="例如：6/8 要出兩箱，上午前送到比較方便。"></textarea>
+                    </div>
+
+                    <div class="button-row">
+                        <button class="button" type="submit" id="submitButton">儲存紀錄</button>
+                        <button class="ghost-button" type="button" id="cancelEditButton" hidden>取消編輯</button>
+                    </div>
+                </form>
+            </section>
+
+            <section class="panel card" aria-labelledby="records-title">
+                <div class="panel-header">
+                    <div>
+                        <h2 id="records-title">紀錄列表</h2>
+                        <p>搜尋框會同時比對客戶名、地址、送貨方式與備註。</p>
+                    </div>
+                    <div class="results-meta" id="resultsMeta">尚未建立任何紀錄</div>
+                </div>
+
+                <div class="search-stack">
+                    <label class="visually-hidden" for="searchInput">搜尋紀錄</label>
+                    <input class="search-input" id="searchInput" type="search" autocomplete="off" placeholder="搜尋客戶名、行政區、送貨方式或備註">
+                    <div class="toolbar">
+                        <div class="toolbar-group">
+                            <button class="ghost-button" type="button" id="clearSearchButton">清除搜尋</button>
+                            <button class="ghost-button" type="button" id="clearAllButton">清空全部紀錄</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="records-grid" id="recordsGrid" aria-live="polite"></div>
+            </section>
+        </div>
+    </main>
+
+    <div class="overlay" id="settingsOverlay" data-open="false" role="presentation">
+        <section class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
+            <div class="panel-header">
+                <div>
+                    <h2 id="settingsTitle">送貨方式設定</h2>
+                    <p class="settings-help">這裡新增或刪除的送貨方式，會直接反映到表單勾選群，也會一起寫進 JSON 資料檔。</p>
+                </div>
+                <button class="ghost-button" type="button" id="closeSettingsButton">關閉</button>
+            </div>
+
+            <form class="inline-form" id="shippingOptionForm">
+                <div class="field">
+                    <label for="shippingOptionInput">新增送貨方式</label>
+                    <input id="shippingOptionInput" autocomplete="off" placeholder="例如：黑貓宅配">
+                </div>
+                <button class="button" type="submit">新增選項</button>
+            </form>
+
+            <div class="settings-list" id="settingsList"></div>
+        </section>
+    </div>
+
+    <input id="importInput" type="file" accept="application/json,.json" hidden>
+
+    <script>
+        const DISTRICTS = {
+            "台北市": ["中正區", "大同區", "中山區", "松山區", "大安區", "萬華區", "信義區", "士林區", "北投區", "內湖區", "南港區", "文山區"],
+            "新北市": ["板橋區", "三重區", "中和區", "永和區", "新莊區", "新店區", "樹林區", "鶯歌區", "三峽區", "淡水區", "汐止區", "瑞芳區", "土城區", "蘆洲區", "五股區", "泰山區", "林口區", "深坑區", "石碇區", "坪林區", "三芝區", "石門區", "八里區", "平溪區", "雙溪區", "貢寮區", "金山區", "萬里區", "烏來區"],
+            "桃園市": ["桃園區", "中壢區", "平鎮區", "八德區", "楊梅區", "蘆竹區", "大溪區", "龍潭區", "龜山區", "大園區", "觀音區", "新屋區", "復興區"],
+            "台中市": ["中區", "東區", "南區", "西區", "北區", "西屯區", "南屯區", "北屯區", "豐原區", "東勢區", "大甲區", "清水區", "沙鹿區", "梧棲區", "后里區", "神岡區", "潭子區", "大雅區", "新社區", "石岡區", "外埔區", "大安區", "烏日區", "大肚區", "龍井區", "霧峰區", "太平區", "大里區", "和平區"],
+            "台南市": ["中西區", "東區", "南區", "北區", "安平區", "安南區", "永康區", "歸仁區", "新化區", "左鎮區", "玉井區", "楠西區", "南化區", "仁德區", "關廟區", "龍崎區", "官田區", "麻豆區", "佳里區", "西港區", "七股區", "將軍區", "學甲區", "北門區", "新營區", "後壁區", "白河區", "東山區", "六甲區", "下營區", "柳營區", "鹽水區", "善化區", "大內區", "山上區", "新市區", "安定區"],
+            "高雄市": ["新興區", "前金區", "苓雅區", "鹽埕區", "鼓山區", "旗津區", "前鎮區", "三民區", "楠梓區", "小港區", "左營區", "仁武區", "大社區", "岡山區", "路竹區", "阿蓮區", "田寮區", "燕巢區", "橋頭區", "梓官區", "彌陀區", "永安區", "湖內區", "鳳山區", "大寮區", "林園區", "鳥松區", "大樹區", "旗山區", "美濃區", "六龜區", "內門區", "杉林區", "甲仙區", "桃源區", "那瑪夏區", "茂林區", "茄萣區"],
+            "基隆市": ["仁愛區", "信義區", "中正區", "中山區", "安樂區", "暖暖區", "七堵區"],
+            "新竹市": ["東區", "北區", "香山區"],
+            "嘉義市": ["東區", "西區"],
+            "新竹縣": ["竹北市", "湖口鄉", "新豐鄉", "新埔鎮", "關西鎮", "芎林鄉", "寶山鄉", "竹東鎮", "五峰鄉", "橫山鄉", "尖石鄉", "北埔鄉", "峨眉鄉"],
+            "苗栗縣": ["竹南鎮", "頭份市", "三灣鄉", "南庄鄉", "獅潭鄉", "後龍鎮", "通霄鎮", "苑裡鎮", "苗栗市", "造橋鄉", "頭屋鄉", "公館鄉", "大湖鄉", "泰安鄉", "銅鑼鄉", "三義鄉", "西湖鄉", "卓蘭鎮"],
+            "彰化縣": ["彰化市", "芬園鄉", "花壇鄉", "秀水鄉", "鹿港鎮", "福興鄉", "線西鄉", "和美鎮", "伸港鄉", "員林市", "社頭鄉", "永靖鄉", "埔心鄉", "溪湖鎮", "大村鄉", "埔鹽鄉", "田中鎮", "北斗鎮", "田尾鄉", "埤頭鄉", "溪州鄉", "竹塘鄉", "二林鎮", "大城鄉", "芳苑鄉", "二水鄉"],
+            "南投縣": ["南投市", "中寮鄉", "草屯鎮", "國姓鄉", "埔里鎮", "仁愛鄉", "名間鄉", "集集鎮", "水里鄉", "魚池鄉", "信義鄉", "竹山鎮", "鹿谷鄉"],
+            "雲林縣": ["斗六市", "斗南鎮", "虎尾鎮", "西螺鎮", "土庫鎮", "北港鎮", "古坑鄉", "大埤鄉", "莿桐鄉", "林內鄉", "二崙鄉", "崙背鄉", "麥寮鄉", "東勢鄉", "褒忠鄉", "台西鄉", "元長鄉", "四湖鄉", "口湖鄉", "水林鄉"],
+            "嘉義縣": ["太保市", "朴子市", "布袋鎮", "大林鎮", "民雄鄉", "溪口鄉", "新港鄉", "六腳鄉", "東石鄉", "義竹鄉", "鹿草鄉", "水上鄉", "中埔鄉", "竹崎鄉", "梅山鄉", "番路鄉", "大埔鄉", "阿里山鄉"],
+            "屏東縣": ["屏東市", "三地門鄉", "霧台鄉", "瑪家鄉", "九如鄉", "里港鄉", "高樹鄉", "鹽埔鄉", "長治鄉", "麟洛鄉", "竹田鄉", "內埔鄉", "萬丹鄉", "潮州鎮", "泰武鄉", "來義鄉", "萬巒鄉", "崁頂鄉", "新埤鄉", "南州鄉", "林邊鄉", "東港鎮", "琉球鄉", "佳冬鄉", "新園鄉", "枋寮鄉", "枋山鄉", "春日鄉", "獅子鄉", "車城鄉", "牡丹鄉", "恆春鎮", "滿州鄉"],
+            "宜蘭縣": ["宜蘭市", "羅東鎮", "蘇澳鎮", "頭城鎮", "礁溪鄉", "壯圍鄉", "員山鄉", "冬山鄉", "五結鄉", "三星鄉", "大同鄉", "南澳鄉"],
+            "花蓮縣": ["花蓮市", "鳳林鎮", "玉里鎮", "新城鄉", "吉安鄉", "壽豐鄉", "光復鄉", "豐濱鄉", "瑞穗鄉", "富里鄉", "秀林鄉", "萬榮鄉", "卓溪鄉"],
+            "台東縣": ["台東市", "成功鎮", "關山鎮", "卑南鄉", "鹿野鄉", "池上鄉", "東河鄉", "長濱鄉", "太麻里鄉", "大武鄉", "綠島鄉", "海端鄉", "延平鄉", "金峰鄉", "達仁鄉", "蘭嶼鄉"],
+            "澎湖縣": ["馬公市", "湖西鄉", "白沙鄉", "西嶼鄉", "望安鄉", "七美鄉"],
+            "金門縣": ["金城鎮", "金沙鎮", "金湖鎮", "金寧鄉", "烈嶼鄉", "烏坵鄉"],
+            "連江縣": ["南竿鄉", "北竿鄉", "莒光鄉", "東引鄉"]
+        };
+
+        const DEFAULT_SHIPPING_OPTIONS = ["自送", "自取", "華誠(小)", "華誠(中)", "華誠(大)", "D.Y.", "D", "東宜", "大粲"];
+        const STORAGE_KEY = "quicknote-state-v1";
+        const HANDLE_DB_NAME = "quicknote-file-handles";
+        const HANDLE_STORE_NAME = "handles";
+        const HANDLE_KEY = "primary-data-file";
+
+        const state = loadInitialState();
+
+        let currentEditId = null;
+        let fileHandle = null;
+        let storageMode = "local";
+
+        const elements = {
+            totalCount: document.getElementById("totalCount"),
+            filteredCount: document.getElementById("filteredCount"),
+            shippingCount: document.getElementById("shippingCount"),
+            lastUpdated: document.getElementById("lastUpdated"),
+            formTitle: document.getElementById("form-title"),
+            resultsMeta: document.getElementById("resultsMeta"),
+            storageStatus: document.getElementById("storageStatus"),
+            recordForm: document.getElementById("recordForm"),
+            customerName: document.getElementById("customerName"),
+            deliveryDate: document.getElementById("deliveryDate"),
+            itemInput: document.getElementById("itemInput"),
+            citySelect: document.getElementById("citySelect"),
+            districtSelect: document.getElementById("districtSelect"),
+            noteInput: document.getElementById("noteInput"),
+            shippingOptions: document.getElementById("shippingOptions"),
+            submitButton: document.getElementById("submitButton"),
+            cancelEditButton: document.getElementById("cancelEditButton"),
+            searchInput: document.getElementById("searchInput"),
+            clearSearchButton: document.getElementById("clearSearchButton"),
+            clearAllButton: document.getElementById("clearAllButton"),
+            recordsGrid: document.getElementById("recordsGrid"),
+            openFileButton: document.getElementById("openFileButton"),
+            saveAsButton: document.getElementById("saveAsButton"),
+            saveButton: document.getElementById("saveButton"),
+            exportButton: document.getElementById("exportButton"),
+            importButton: document.getElementById("importButton"),
+            importInput: document.getElementById("importInput"),
+            settingsButton: document.getElementById("settingsButton"),
+            closeSettingsButton: document.getElementById("closeSettingsButton"),
+            settingsOverlay: document.getElementById("settingsOverlay"),
+            settingsList: document.getElementById("settingsList"),
+            shippingOptionForm: document.getElementById("shippingOptionForm"),
+            shippingOptionInput: document.getElementById("shippingOptionInput")
+        };
+
+        init();
+
+        function init() {
+            renderCitySelect();
+            renderShippingOptions();
+            bindEvents();
+            renderAll();
+            void restoreSavedFileHandle();
+        }
+
+        function bindEvents() {
+            elements.recordForm.addEventListener("submit", handleRecordSubmit);
+            elements.citySelect.addEventListener("change", handleCityChange);
+            elements.cancelEditButton.addEventListener("click", resetForm);
+            elements.searchInput.addEventListener("input", renderRecords);
+            elements.clearSearchButton.addEventListener("click", clearSearch);
+            elements.clearAllButton.addEventListener("click", clearAllRecords);
+            elements.openFileButton.addEventListener("click", openDataFile);
+            elements.saveAsButton.addEventListener("click", saveAsDataFile);
+            elements.saveButton.addEventListener("click", manualSave);
+            elements.exportButton.addEventListener("click", exportJsonFile);
+            elements.importButton.addEventListener("click", () => elements.importInput.click());
+            elements.importInput.addEventListener("change", importJsonFile);
+            elements.settingsButton.addEventListener("click", openSettings);
+            elements.closeSettingsButton.addEventListener("click", closeSettings);
+            elements.settingsOverlay.addEventListener("click", (event) => {
+                if (event.target === elements.settingsOverlay) {
+                    closeSettings();
+                }
+            });
+            elements.shippingOptionForm.addEventListener("submit", handleShippingOptionSubmit);
+            document.addEventListener("keydown", (event) => {
+                if (event.key === "Escape" && elements.settingsOverlay.dataset.open === "true") {
+                    closeSettings();
+                }
+            });
+        }
+
+        function loadInitialState() {
+            try {
+                const cached = localStorage.getItem(STORAGE_KEY);
+                if (!cached) {
+                    return createDefaultState();
+                }
+                return normalizeState(JSON.parse(cached));
+            } catch {
+                return createDefaultState();
+            }
+        }
+
+        function createDefaultState() {
+            return {
+                shippingOptions: [...DEFAULT_SHIPPING_OPTIONS],
+                records: []
+            };
+        }
+
+        function normalizeState(raw) {
+            const next = createDefaultState();
+            const incomingOptions = Array.isArray(raw?.shippingOptions) ? raw.shippingOptions : DEFAULT_SHIPPING_OPTIONS;
+            next.shippingOptions = uniqueTrimmedList(incomingOptions, DEFAULT_SHIPPING_OPTIONS);
+            next.records = Array.isArray(raw?.records)
+                ? raw.records
+                    .map(normalizeRecord)
+                    .filter(Boolean)
+                    .sort((left, right) => new Date(right.updatedAt) - new Date(left.updatedAt))
+                : [];
+            return next;
+        }
+
+        function normalizeRecord(record) {
+            if (!record || typeof record !== "object") {
+                return null;
+            }
+            const name = String(record.name ?? "").trim();
+            const city = String(record.city ?? "").trim();
+            const district = String(record.district ?? "").trim();
+            if (!name || !city || !district) {
+                return null;
+            }
+            return {
+                id: String(record.id ?? createId()),
+                name,
+                deliveryDate: normalizeDateValue(record.deliveryDate),
+                item: String(record.item ?? "").trim(),
+                city,
+                district,
+                shipping: uniqueTrimmedList(record.shipping, []),
+                note: String(record.note ?? "").trim(),
+                createdAt: isValidDate(record.createdAt) ? record.createdAt : new Date().toISOString(),
+                updatedAt: isValidDate(record.updatedAt) ? record.updatedAt : new Date().toISOString()
+            };
+        }
+
+        function uniqueTrimmedList(values, fallback) {
+            const source = Array.isArray(values) ? values : fallback;
+            return [...new Set(source.map((item) => String(item ?? "").trim()).filter(Boolean))];
+        }
+
+        function normalizeDateValue(value) {
+            if (typeof value !== "string") {
+                return "";
+            }
+            const trimmed = value.trim();
+            return /^\d{4}-\d{2}-\d{2}$/.test(trimmed) ? trimmed : "";
+        }
+
+        function isValidDate(value) {
+            return !Number.isNaN(new Date(value).getTime());
+        }
+
+        function createId() {
+            if (window.crypto?.randomUUID) {
+                return window.crypto.randomUUID();
+            }
+            return `id-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+        }
+
+        function renderAll() {
+            renderShippingOptions();
+            renderSettingsList();
+            renderRecords();
+            renderSummary();
+        }
+
+        function renderCitySelect(selectedCity = "", selectedDistrict = "") {
+            const cityNames = Object.keys(DISTRICTS);
+            elements.citySelect.innerHTML = [
+                '<option value="">請選擇縣市</option>',
+                ...cityNames.map((city) => `<option value="${escapeAttribute(city)}">${escapeHtml(city)}</option>`)
+            ].join("");
+            elements.citySelect.value = selectedCity;
+            renderDistrictSelect(selectedCity, selectedDistrict);
+        }
+
+        function renderDistrictSelect(city, selectedDistrict = "") {
+            const districts = city ? DISTRICTS[city] ?? [] : [];
+            elements.districtSelect.disabled = districts.length === 0;
+            elements.districtSelect.innerHTML = [
+                `<option value="">${districts.length ? "請選擇行政區" : "請先選擇縣市"}</option>`,
+                ...districts.map((district) => `<option value="${escapeAttribute(district)}">${escapeHtml(district)}</option>`)
+            ].join("");
+            if (selectedDistrict && districts.includes(selectedDistrict)) {
+                elements.districtSelect.value = selectedDistrict;
+            }
+        }
+
+        function renderShippingOptions(selected = null) {
+            const selectedValues = new Set(selected ?? getSelectedShippingValues());
+            elements.shippingOptions.innerHTML = state.shippingOptions.length
+                ? state.shippingOptions.map((option) => `
+                    <label class="checkbox-chip">
+                        <input type="checkbox" name="shipping" value="${escapeAttribute(option)}" ${selectedValues.has(option) ? "checked" : ""}>
+                        <span>${escapeHtml(option)}</span>
+                    </label>
+                `).join("")
+                : '<p class="hint">目前沒有送貨方式，請先到設定新增選項。</p>';
+        }
+
+        function renderSettingsList() {
+            if (!state.shippingOptions.length) {
+                elements.settingsList.innerHTML = '<div class="empty-state"><h3>尚無送貨方式</h3><p>先新增一個選項，表單就會同步出現可勾選的送貨方式。</p></div>';
+                return;
+            }
+
+            elements.settingsList.innerHTML = state.shippingOptions.map((option) => `
+                <div class="settings-item">
+                    <span>${escapeHtml(option)}</span>
+                    <button class="danger-button" type="button" data-option-delete="${escapeAttribute(option)}">刪除</button>
+                </div>
+            `).join("");
+
+            elements.settingsList.querySelectorAll("[data-option-delete]").forEach((button) => {
+                button.addEventListener("click", () => deleteShippingOption(button.dataset.optionDelete));
+            });
+        }
+
+        function renderSummary(filteredRecords = null) {
+            const records = filteredRecords ?? getFilteredRecords();
+            const latest = state.records[0]?.updatedAt;
+
+            elements.totalCount.textContent = String(state.records.length);
+            elements.filteredCount.textContent = String(records.length);
+            elements.shippingCount.textContent = String(state.shippingOptions.length);
+            elements.lastUpdated.textContent = latest ? formatDateTime(latest) : "尚未建立";
+        }
+
+        function renderRecords() {
+            const records = getFilteredRecords();
+            renderSummary(records);
+
+            if (!state.records.length) {
+                elements.resultsMeta.textContent = "尚未建立任何紀錄";
+                elements.recordsGrid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>還沒有客戶資料</h3>
+                        <p>從左側表單開始新增第一筆資料，之後就能搜尋、編輯與刪除。</p>
+                    </div>
+                `;
+                return;
+            }
+
+            elements.resultsMeta.textContent = records.length
+                ? `共顯示 ${records.length} / ${state.records.length} 筆紀錄`
+                : `搜尋不到符合條件的資料，目前總共有 ${state.records.length} 筆紀錄`;
+
+            if (!records.length) {
+                elements.recordsGrid.innerHTML = `
+                    <div class="empty-state">
+                        <h3>找不到符合條件的資料</h3>
+                        <p>可以試試看客戶名、行政區、送貨方式或備註關鍵字。</p>
+                    </div>
+                `;
+                return;
+            }
+
+            elements.recordsGrid.innerHTML = records.map((record) => `
+                <article class="record-card">
+                    <div class="record-top">
+                        <div class="record-title">
+                            <h3>${escapeHtml(record.name)}</h3>
+                            <small>${escapeHtml(record.city + record.district)}</small>
+                        </div>
+                        <div class="record-actions">
+                            <button class="ghost-button" type="button" data-edit-id="${escapeAttribute(record.id)}">編輯</button>
+                            <button class="danger-button" type="button" data-delete-id="${escapeAttribute(record.id)}">刪除</button>
+                        </div>
+                    </div>
+                    <div class="record-meta">
+                        <span class="pill muted">出貨：${record.deliveryDate ? formatDeliveryDate(record.deliveryDate) : "未設定日期"}</span>
+                        ${record.shipping.length
+                            ? record.shipping.map((item) => `<span class="pill">${escapeHtml(item)}</span>`).join("")
+                            : '<span class="pill muted">未選擇送貨方式</span>'}
+                    </div>
+                    <div class="record-item">${record.item ? escapeHtml(record.item) : "尚未填寫貨品內容"}</div>
+                    <div class="record-note">${record.note ? escapeHtml(record.note) : "尚未填寫備註"}</div>
+                    <div class="record-meta">
+                        <span class="pill muted">建立：${formatDateTime(record.createdAt)}</span>
+                        <span class="pill muted">更新：${formatDateTime(record.updatedAt)}</span>
+                    </div>
+                </article>
+            `).join("");
+
+            elements.recordsGrid.querySelectorAll("[data-edit-id]").forEach((button) => {
+                button.addEventListener("click", () => startEdit(button.dataset.editId));
+            });
+
+            elements.recordsGrid.querySelectorAll("[data-delete-id]").forEach((button) => {
+                button.addEventListener("click", () => deleteRecord(button.dataset.deleteId));
+            });
+        }
+
+        function getFilteredRecords() {
+            const query = elements.searchInput.value.trim().toLowerCase();
+            if (!query) {
+                return [...state.records];
+            }
+
+            return state.records.filter((record) => {
+                const haystack = [
+                    record.name,
+                    record.deliveryDate,
+                    formatDeliveryDate(record.deliveryDate),
+                    record.item,
+                    `${record.city}${record.district}`,
+                    `${record.city} ${record.district}`,
+                    record.shipping.join(" "),
+                    record.note
+                ].join("\n").toLowerCase();
+                return haystack.includes(query);
+            });
+        }
+
+        function handleCityChange() {
+            renderDistrictSelect(elements.citySelect.value);
+        }
+
+        async function handleRecordSubmit(event) {
+            event.preventDefault();
+            const formData = getFormData();
+            if (!formData) {
+                return;
+            }
+
+            const timestamp = new Date().toISOString();
+            if (currentEditId) {
+                const index = state.records.findIndex((record) => record.id === currentEditId);
+                if (index !== -1) {
+                    state.records[index] = {
+                        ...state.records[index],
+                        ...formData,
+                        updatedAt: timestamp
+                    };
+                }
+                setStorageStatus("已更新紀錄", "local");
+            } else {
+                state.records.unshift({
+                    id: createId(),
+                    ...formData,
+                    createdAt: timestamp,
+                    updatedAt: timestamp
+                });
+                setStorageStatus("已新增紀錄", "local");
+            }
+
+            sortRecords();
+            persistLocalState();
+            renderAll();
+            resetForm();
+            await autoSaveIfPossible();
+        }
+
+        function getFormData() {
+            const name = elements.customerName.value.trim();
+            const deliveryDate = elements.deliveryDate.value;
+            const item = elements.itemInput.value.trim();
+            const city = elements.citySelect.value;
+            const district = elements.districtSelect.value;
+            const shipping = getSelectedShippingValues();
+            const note = elements.noteInput.value.trim();
+
+            if (!name) {
+                window.alert("請先填寫客戶名。");
+                elements.customerName.focus();
+                return null;
+            }
+
+            if (!city) {
+                window.alert("請先選擇縣市。");
+                elements.citySelect.focus();
+                return null;
+            }
+
+            if (!deliveryDate) {
+                window.alert("請先選擇出貨日期。");
+                elements.deliveryDate.focus();
+                return null;
+            }
+
+            if (!item) {
+                window.alert("請先填寫貨品內容。");
+                elements.itemInput.focus();
+                return null;
+            }
+
+            if (!district) {
+                window.alert("請先選擇行政區。");
+                elements.districtSelect.focus();
+                return null;
+            }
+
+            return { name, deliveryDate, item, city, district, shipping, note };
+        }
+
+        function getSelectedShippingValues() {
+            return Array.from(document.querySelectorAll('input[name="shipping"]:checked')).map((input) => input.value);
+        }
+
+        function startEdit(recordId) {
+            const record = state.records.find((item) => item.id === recordId);
+            if (!record) {
+                return;
+            }
+
+            currentEditId = record.id;
+            elements.formTitle.textContent = "編輯紀錄";
+            elements.submitButton.textContent = "更新紀錄";
+            elements.cancelEditButton.hidden = false;
+            elements.customerName.value = record.name;
+            elements.deliveryDate.value = record.deliveryDate;
+            elements.itemInput.value = record.item;
+            renderCitySelect(record.city, record.district);
+            elements.noteInput.value = record.note;
+            renderShippingOptions(record.shipping);
+            elements.customerName.focus();
+        }
+
+        function resetForm() {
+            currentEditId = null;
+            elements.formTitle.textContent = "新增紀錄";
+            elements.submitButton.textContent = "儲存紀錄";
+            elements.cancelEditButton.hidden = true;
+            elements.recordForm.reset();
+            renderCitySelect();
+            renderShippingOptions();
+        }
+
+        async function deleteRecord(recordId) {
+            const record = state.records.find((item) => item.id === recordId);
+            if (!record) {
+                return;
+            }
+
+            const confirmed = window.confirm(`確定要刪除「${record.name}」這筆紀錄嗎？`);
+            if (!confirmed) {
+                return;
+            }
+
+            state.records.splice(state.records.findIndex((item) => item.id === recordId), 1);
+            if (currentEditId === recordId) {
+                resetForm();
+            }
+            persistLocalState();
+            renderAll();
+            setStorageStatus("已刪除紀錄", "local");
+            await autoSaveIfPossible();
+        }
+
+        function clearSearch() {
+            elements.searchInput.value = "";
+            renderRecords();
+        }
+
+        async function clearAllRecords() {
+            if (!state.records.length) {
+                return;
+            }
+            const confirmed = window.confirm("確定要清空全部紀錄嗎？這個動作無法復原。");
+            if (!confirmed) {
+                return;
+            }
+
+            state.records = [];
+            resetForm();
+            persistLocalState();
+            renderAll();
+            setStorageStatus("已清空全部紀錄", "local");
+            await autoSaveIfPossible();
+        }
+
+        async function handleShippingOptionSubmit(event) {
+            event.preventDefault();
+            const value = elements.shippingOptionInput.value.trim();
+            if (!value) {
+                elements.shippingOptionInput.focus();
+                return;
+            }
+            if (state.shippingOptions.includes(value)) {
+                window.alert("這個送貨方式已經存在。");
+                elements.shippingOptionInput.focus();
+                return;
+            }
+
+            state.shippingOptions.push(value);
+            state.shippingOptions.sort((left, right) => left.localeCompare(right, "zh-Hant"));
+            elements.shippingOptionInput.value = "";
+            persistLocalState();
+            renderAll();
+            setStorageStatus("已新增送貨方式", "local");
+            await autoSaveIfPossible();
+            elements.shippingOptionInput.focus();
+        }
+
+        async function deleteShippingOption(option) {
+            const isUsed = state.records.some((record) => record.shipping.includes(option));
+            const confirmed = window.confirm(
+                isUsed
+                    ? `「${option}」已被既有紀錄使用，刪除後會一併從那些紀錄移除。確定刪除嗎？`
+                    : `確定要刪除送貨方式「${option}」嗎？`
+            );
+            if (!confirmed) {
+                return;
+            }
+
+            state.shippingOptions = state.shippingOptions.filter((item) => item !== option);
+            state.records = state.records.map((record) => {
+                const nextShipping = record.shipping.filter((item) => item !== option);
+                if (nextShipping.length === record.shipping.length) {
+                    return record;
+                }
+                return {
+                    ...record,
+                    shipping: nextShipping,
+                    updatedAt: new Date().toISOString()
+                };
+            });
+            sortRecords();
+            persistLocalState();
+            renderAll();
+            setStorageStatus("已刪除送貨方式", "local");
+            await autoSaveIfPossible();
+        }
+
+        function openSettings() {
+            elements.settingsOverlay.dataset.open = "true";
+            elements.shippingOptionInput.focus();
+        }
+
+        function closeSettings() {
+            elements.settingsOverlay.dataset.open = "false";
+            elements.settingsButton.focus();
+        }
+
+        function persistLocalState() {
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            storageMode = fileHandle ? "file" : "local";
+        }
+
+        function sortRecords() {
+            state.records.sort((left, right) => new Date(right.updatedAt) - new Date(left.updatedAt));
+        }
+
+        async function manualSave() {
+            if (!supportsFileSystemAccess()) {
+                setStorageStatus("目前瀏覽器不支援直接寫入檔案，請改用匯出 JSON。", "error");
+                return;
+            }
+
+            try {
+                if (!fileHandle) {
+                    await saveAsDataFile();
+                    return;
+                }
+                await writeToDataFile(fileHandle);
+                setStorageStatus("已寫入桌面資料檔", "file");
+            } catch (error) {
+                handleFileError(error, "存檔失敗");
+            }
+        }
+
+        async function autoSaveIfPossible() {
+            if (!fileHandle || !supportsFileSystemAccess()) {
+                return;
+            }
+            try {
+                const granted = await verifyFilePermission(fileHandle, true);
+                if (!granted) {
+                    setStorageStatus("已更新瀏覽器暫存，桌面檔案尚未授權寫入。", "warn");
+                    return;
+                }
+                await writeToDataFile(fileHandle);
+                setStorageStatus("已同步寫入桌面資料檔", "file");
+            } catch (error) {
+                handleFileError(error, "自動存檔失敗");
+            }
+        }
+
+        async function openDataFile() {
+            if (!supportsFileSystemAccess()) {
+                setStorageStatus("目前瀏覽器不支援直接開啟檔案，請改用匯入 JSON。", "error");
+                return;
+            }
+
+            try {
+                const [handle] = await window.showOpenFilePicker({
+                    multiple: false,
+                    types: [{ description: "JSON", accept: { "application/json": [".json"] } }]
+                });
+                const granted = await verifyFilePermission(handle, false);
+                if (!granted) {
+                    setStorageStatus("未取得資料檔讀取權限。", "warn");
+                    return;
+                }
+                const data = await readDataFile(handle);
+                applyLoadedState(data);
+                fileHandle = handle;
+                await storeFileHandle(handle);
+                setStorageStatus("已從資料檔載入資料", "file");
+            } catch (error) {
+                if (error?.name === "AbortError") {
+                    return;
+                }
+                handleFileError(error, "開啟資料檔失敗");
+            }
+        }
+
+        async function saveAsDataFile() {
+            if (!supportsFileSystemAccess()) {
+                setStorageStatus("目前瀏覽器不支援直接另存檔案，請改用匯出 JSON。", "error");
+                return;
+            }
+
+            try {
+                const handle = await window.showSaveFilePicker({
+                    suggestedName: "quicknote-data.json",
+                    types: [{ description: "JSON", accept: { "application/json": [".json"] } }]
+                });
+                const granted = await verifyFilePermission(handle, true);
+                if (!granted) {
+                    setStorageStatus("未取得資料檔寫入權限。", "warn");
+                    return;
+                }
+                fileHandle = handle;
+                await storeFileHandle(handle);
+                await writeToDataFile(handle);
+                setStorageStatus("已建立並寫入桌面資料檔", "file");
+            } catch (error) {
+                if (error?.name === "AbortError") {
+                    return;
+                }
+                handleFileError(error, "另存資料檔失敗");
+            }
+        }
+
+        function exportJsonFile() {
+            const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `quicknote-export-${new Date().toISOString().slice(0, 10)}.json`;
+            document.body.append(link);
+            link.click();
+            link.remove();
+            URL.revokeObjectURL(url);
+            setStorageStatus("已匯出 JSON 檔", fileHandle ? "file" : "local");
+        }
+
+        async function importJsonFile(event) {
+            const file = event.target.files?.[0];
+            if (!file) {
+                return;
+            }
+
+            try {
+                const text = await file.text();
+                const data = JSON.parse(text);
+                applyLoadedState(data);
+                setStorageStatus("已匯入 JSON 檔", fileHandle ? "file" : "local");
+                await autoSaveIfPossible();
+            } catch {
+                window.alert("匯入失敗，請確認 JSON 格式是否正確。");
+            } finally {
+                event.target.value = "";
+            }
+        }
+
+        function applyLoadedState(data) {
+            const next = normalizeState(data);
+            state.shippingOptions = next.shippingOptions;
+            state.records = next.records;
+            currentEditId = null;
+            persistLocalState();
+            resetForm();
+            renderAll();
+        }
+
+        function supportsFileSystemAccess() {
+            return typeof window.showOpenFilePicker === "function" && typeof window.showSaveFilePicker === "function";
+        }
+
+        async function writeToDataFile(handle) {
+            const writable = await handle.createWritable();
+            await writable.write(JSON.stringify(state, null, 2));
+            await writable.close();
+            storageMode = "file";
+        }
+
+        async function readDataFile(handle) {
+            const file = await handle.getFile();
+            const text = await file.text();
+            return text.trim() ? JSON.parse(text) : createDefaultState();
+        }
+
+        async function verifyFilePermission(handle, writable) {
+            const options = writable ? { mode: "readwrite" } : {};
+            if (typeof handle.queryPermission === "function") {
+                const current = await handle.queryPermission(options);
+                if (current === "granted") {
+                    return true;
+                }
+            }
+            if (typeof handle.requestPermission === "function") {
+                return (await handle.requestPermission(options)) === "granted";
+            }
+            return true;
+        }
+
+        async function restoreSavedFileHandle() {
+            if (!supportsFileSystemAccess()) {
+                setStorageStatus("目前瀏覽器不支援直接寫入檔案，請使用匯出/匯入 JSON。", "warn");
+                return;
+            }
+
+            try {
+                const savedHandle = await getStoredFileHandle();
+                if (!savedHandle) {
+                    setStorageStatus("目前只存在瀏覽器暫存，建議另存資料檔。", "warn");
+                    return;
+                }
+                const granted = await verifyFilePermission(savedHandle, false);
+                if (!granted) {
+                    setStorageStatus("找到上次的資料檔，但還沒重新授權。", "warn");
+                    return;
+                }
+                const data = await readDataFile(savedHandle);
+                fileHandle = savedHandle;
+                applyLoadedState(data);
+                setStorageStatus("已自動載入上次的資料檔", "file");
+            } catch (error) {
+                handleFileError(error, "自動讀取資料檔失敗");
+            }
+        }
+
+        function setStorageStatus(message, mode) {
+            storageMode = mode;
+            elements.storageStatus.textContent = message;
+            elements.storageStatus.className = "storage-status";
+            if (mode === "warn") {
+                elements.storageStatus.classList.add("warn");
+            } else if (mode === "error") {
+                elements.storageStatus.classList.add("error");
+            }
+        }
+
+        function handleFileError(error, prefix) {
+            console.error(prefix, error);
+            const message = error?.message ? `${prefix}：${error.message}` : prefix;
+            setStorageStatus(message, "error");
+        }
+
+        function formatDateTime(value) {
+            const date = new Date(value);
+            if (Number.isNaN(date.getTime())) {
+                return "時間格式錯誤";
+            }
+            return new Intl.DateTimeFormat("zh-TW", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                minute: "2-digit"
+            }).format(date);
+        }
+
+        function formatDeliveryDate(value) {
+            if (!value) {
+                return "";
+            }
+            const date = new Date(`${value}T00:00:00`);
+            if (Number.isNaN(date.getTime())) {
+                return value;
+            }
+            return new Intl.DateTimeFormat("zh-TW", {
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit"
+            }).format(date);
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#39;");
+        }
+
+        function escapeAttribute(value) {
+            return escapeHtml(value);
+        }
+
+        function openDb() {
+            return new Promise((resolve, reject) => {
+                const request = indexedDB.open(HANDLE_DB_NAME, 1);
+                request.addEventListener("upgradeneeded", () => {
+                    request.result.createObjectStore(HANDLE_STORE_NAME);
+                });
+                request.addEventListener("success", () => resolve(request.result));
+                request.addEventListener("error", () => reject(request.error));
+            });
+        }
+
+        async function storeFileHandle(handle) {
+            try {
+                const db = await openDb();
+                await new Promise((resolve, reject) => {
+                    const transaction = db.transaction(HANDLE_STORE_NAME, "readwrite");
+                    transaction.objectStore(HANDLE_STORE_NAME).put(handle, HANDLE_KEY);
+                    transaction.addEventListener("complete", resolve);
+                    transaction.addEventListener("error", () => reject(transaction.error));
+                });
+                db.close();
+            } catch {
+                setStorageStatus("已存到本機暫存，但無法記住資料檔連結。", "warn");
+            }
+        }
+
+        async function getStoredFileHandle() {
+            try {
+                const db = await openDb();
+                const handle = await new Promise((resolve, reject) => {
+                    const transaction = db.transaction(HANDLE_STORE_NAME, "readonly");
+                    const request = transaction.objectStore(HANDLE_STORE_NAME).get(HANDLE_KEY);
+                    request.addEventListener("success", () => resolve(request.result ?? null));
+                    request.addEventListener("error", () => reject(request.error));
+                });
+                db.close();
+                return handle;
+            } catch {
+                return null;
+            }
+        }
+    </script>
+</body>
+</html>
