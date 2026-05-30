@@ -195,7 +195,7 @@
             background: var(--danger-soft);
         }
 
-        .search-input, .field input, .field select, .field textarea {
+        .search-input, .field input, .field select, .field textarea, .settings-edit-form input {
             width: 100%;
             min-height: 3rem;
             border: 1px solid rgba(92, 70, 55, 0.16);
@@ -446,6 +446,14 @@
             flex-wrap: wrap;
         }
 
+        .settings-edit-form {
+            width: 100%;
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) auto;
+            gap: var(--space-2);
+            align-items: center;
+        }
+
         .inline-form {
             display: grid;
             grid-template-columns: minmax(0, 1fr) auto;
@@ -485,7 +493,7 @@
                 width: 100%;
             }
 
-            .form-grid.two, .inline-form {
+            .form-grid.two, .inline-form, .settings-edit-form {
                 grid-template-columns: 1fr;
             }
 
@@ -597,11 +605,9 @@
                         <h3 id="dataActionsTitle">資料操作</h3>
                     </div>
                     <div class="settings-actions">
-                        <button class="ghost-button" type="button" @click="openDataFile">開啟資料檔</button>
-                        <button class="ghost-button" type="button" @click="saveAsDataFile">另存資料檔</button>
-                        <button class="button" type="button" @click="manualSave">存檔</button>
-                        <button class="ghost-button" type="button" @click="exportJsonFile">匯出 JSON</button>
-                        <button class="ghost-button" type="button" @click="openImportDialog">匯入 JSON</button>
+                        <button class="ghost-button" type="button" @click="openDataFile">開啟 JSON</button>
+                        <button class="button" type="button" @click="manualSave">儲存 JSON</button>
+                        <button class="ghost-button" type="button" @click="exportJsonFile">下載副本</button>
                         <button class="danger-button" type="button" @click="clearAllRecords">清空全部紀錄</button>
                     </div>
                 </section>
@@ -622,11 +628,20 @@
                             <h3>尚無送貨方式</h3>
                         </div>
                         <div v-for="option in state.shippingOptions" :key="option" class="settings-item">
-                            <strong>{{ option }}</strong>
-                            <div class="settings-item-actions">
-                                <button class="ghost-button" type="button" @click="renameShippingOption(option)">改名</button>
-                                <button class="danger-button" type="button" @click="deleteShippingOption(option)">刪除</button>
-                            </div>
+                            <form v-if="editingShippingOption === option" class="settings-edit-form" @submit.prevent="saveShippingOptionRename(option)">
+                                <input data-shipping-edit-input v-model.trim="shippingOptionDraft" autocomplete="off" aria-label="修改送貨方式名稱">
+                                <div class="settings-item-actions">
+                                    <button class="button" type="submit">儲存</button>
+                                    <button class="ghost-button" type="button" @click="cancelShippingOptionRename">取消</button>
+                                </div>
+                            </form>
+                            <template v-else>
+                                <strong>{{ option }}</strong>
+                                <div class="settings-item-actions">
+                                    <button class="ghost-button" type="button" @click="startRenameShippingOption(option)">改名</button>
+                                    <button class="danger-button" type="button" @click="deleteShippingOption(option)">刪除</button>
+                                </div>
+                            </template>
                         </div>
                     </div>
                 </section>
@@ -904,6 +919,8 @@
                 const searchQuery = ref("");
                 const showSettings = ref(false);
                 const newShippingOption = ref("");
+                const editingShippingOption = ref("");
+                const shippingOptionDraft = ref("");
                 const importInput = ref(null);
                 const editingId = ref(null);
                 const isCreating = ref(false);
@@ -1020,10 +1037,10 @@
                         const granted = await verifyFilePermission(fileHandle.value, true);
                         if (!granted) return setStatus(`${message}，桌面檔案尚未授權寫入。`, "warn");
                         await writeToDataFile(fileHandle.value, state);
-                        setStatus(`${message}，已寫入資料檔。`);
+                        setStatus(`${message}，已儲存 JSON。`);
                     } catch (error) {
                         console.error(error);
-                        setStatus(`${message}，但寫入資料檔失敗。`, "error");
+                        setStatus(`${message}，但儲存 JSON 失敗。`, "error");
                     }
                 }
 
@@ -1091,15 +1108,28 @@
                     await persistAfterChange("已新增送貨方式");
                 }
 
-                async function renameShippingOption(option) {
-                    const value = prompt("修改送貨方式名稱", option)?.trim();
-                    if (!value || value === option) return;
+                function startRenameShippingOption(option) {
+                    editingShippingOption.value = option;
+                    shippingOptionDraft.value = option;
+                    nextTick(() => document.querySelector("[data-shipping-edit-input]")?.focus());
+                }
+
+                function cancelShippingOptionRename() {
+                    editingShippingOption.value = "";
+                    shippingOptionDraft.value = "";
+                }
+
+                async function saveShippingOptionRename(option) {
+                    const value = shippingOptionDraft.value.trim();
+                    if (!value) return alert("請先填寫送貨方式名稱。");
+                    if (value === option) return cancelShippingOptionRename();
                     if (state.shippingOptions.includes(value)) return alert("這個送貨方式已經存在。");
                     state.shippingOptions = state.shippingOptions.map((item) => item === option ? value : item).sort((a, b) => a.localeCompare(b, "zh-Hant"));
                     state.records = state.records.map((record) => record.shipping.includes(option)
                         ? { ...record, shipping: record.shipping.map((item) => item === option ? value : item), updatedAt: new Date().toISOString() }
                         : record);
                     editorForm.shipping = editorForm.shipping.map((item) => item === option ? value : item);
+                    cancelShippingOptionRename();
                     sortRecords();
                     await persistAfterChange("已修改送貨方式");
                 }
@@ -1113,6 +1143,7 @@
                         ? { ...record, shipping: record.shipping.filter((item) => item !== option), updatedAt: new Date().toISOString() }
                         : record);
                     editorForm.shipping = editorForm.shipping.filter((item) => item !== option);
+                    if (editingShippingOption.value === option) cancelShippingOptionRename();
                     sortRecords();
                     await persistAfterChange("已刪除送貨方式");
                 }
@@ -1121,24 +1152,24 @@
                     if (!supportsFileSystemAccess()) return exportJsonFile();
                     if (!fileHandle.value) return saveAsDataFile();
                     await writeToDataFile(fileHandle.value, state);
-                    setStatus("已寫入資料檔。");
+                    setStatus("已儲存 JSON。");
                 }
 
                 async function openDataFile() {
-                    if (!supportsFileSystemAccess()) return openImportDialog();
+                    if (!supportsFileSystemAccess()) return alert("目前瀏覽器不支援直接開啟 JSON，請改用下載副本備份資料。");
                     if (!discardEditor()) return;
                     try {
                         const [handle] = await window.showOpenFilePicker({ multiple: false, types: [{ description: "JSON", accept: { "application/json": [".json"] } }] });
-                        if (!await verifyFilePermission(handle, false)) return setStatus("未取得資料檔讀取權限。", "warn");
+                        if (!await verifyFilePermission(handle, false)) return setStatus("未取得 JSON 讀取權限。", "warn");
                         const next = normalizeState(await readDataFile(handle));
                         state.shippingOptions = next.shippingOptions;
                         state.records = next.records;
                         fileHandle.value = handle;
                         await storeFileHandle(handle);
                         persistLocalState();
-                        setStatus("已從資料檔載入資料。");
+                        setStatus("已載入 JSON。");
                     } catch (error) {
-                        if (error?.name !== "AbortError") setStatus("開啟資料檔失敗。", "error");
+                        if (error?.name !== "AbortError") setStatus("開啟 JSON 失敗。", "error");
                     }
                 }
 
@@ -1146,13 +1177,13 @@
                     if (!supportsFileSystemAccess()) return exportJsonFile();
                     try {
                         const handle = await window.showSaveFilePicker({ suggestedName: "quicknote-data.json", types: [{ description: "JSON", accept: { "application/json": [".json"] } }] });
-                        if (!await verifyFilePermission(handle, true)) return setStatus("未取得資料檔寫入權限。", "warn");
+                        if (!await verifyFilePermission(handle, true)) return setStatus("未取得 JSON 寫入權限。", "warn");
                         fileHandle.value = handle;
                         await storeFileHandle(handle);
                         await writeToDataFile(handle, state);
-                        setStatus("已建立並寫入資料檔。");
+                        setStatus("已儲存 JSON。");
                     } catch (error) {
-                        if (error?.name !== "AbortError") setStatus("另存資料檔失敗。", "error");
+                        if (error?.name !== "AbortError") setStatus("儲存 JSON 失敗。", "error");
                     }
                 }
 
@@ -1166,7 +1197,7 @@
                     link.click();
                     link.remove();
                     URL.revokeObjectURL(url);
-                    setStatus("已匯出 JSON。");
+                    setStatus("已下載 JSON 副本。");
                 }
 
                 function openImportDialog() {
@@ -1200,7 +1231,7 @@
                         fileHandle.value = handle;
                         persistLocalState();
                     } catch {
-                        setStatus("自動讀取上次資料檔失敗。", "warn");
+                        setStatus("自動讀取上次 JSON 失敗。", "warn");
                     }
                 });
 
@@ -1209,6 +1240,8 @@
                     searchQuery,
                     showSettings,
                     newShippingOption,
+                    editingShippingOption,
+                    shippingOptionDraft,
                     importInput,
                     editingId,
                     isCreating,
@@ -1229,7 +1262,9 @@
                     openSettings,
                     closeSettings,
                     addShippingOption,
-                    renameShippingOption,
+                    startRenameShippingOption,
+                    cancelShippingOptionRename,
+                    saveShippingOptionRename,
                     deleteShippingOption,
                     manualSave,
                     openDataFile,
