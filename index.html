@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-Hant">
 <head>
     <meta charset="UTF-8">
@@ -7,60 +7,49 @@
     <style>
         :root {
             color-scheme: light;
-            --bg: #f7f1e8;
-            --bg-accent: #efe3d1;
-            --surface: rgba(255, 252, 248, 0.9);
-            --surface-strong: #fffdf9;
-            --surface-muted: #f5ecdf;
-            --text: #2f261f;
-            --text-soft: #67584d;
-            --primary: #a14f2a;
-            --primary-strong: #7c3817;
-            --primary-soft: #f6d9c7;
-            --secondary: #2f6f68;
-            --secondary-soft: #d5ece6;
-            --danger: #9d2d2d;
-            --danger-soft: #f8d7d7;
-            --border: rgba(95, 69, 53, 0.18);
-            --shadow-lg: 0 30px 60px rgba(88, 55, 37, 0.14);
-            --shadow-md: 0 16px 32px rgba(88, 55, 37, 0.1);
-            --radius-xl: 28px;
-            --radius-lg: 20px;
+            --page: #f4eadb;
+            --panel: rgba(255, 253, 249, 0.94);
+            --panel-strong: #fffdfa;
+            --muted: #f4ece0;
+            --text: #2d241e;
+            --text-soft: #6b5a4e;
+            --primary: #a24d24;
+            --primary-dark: #783617;
+            --secondary: #2f766f;
+            --secondary-soft: #dcece7;
+            --danger: #a73535;
+            --danger-soft: #f8d8d8;
+            --warning-soft: #f7dfdd;
+            --border: rgba(92, 70, 55, 0.18);
+            --shadow: 0 24px 54px rgba(86, 56, 34, 0.12);
+            --radius-xl: 24px;
+            --radius-lg: 18px;
             --radius-md: 14px;
-            --radius-sm: 10px;
             --space-1: 0.5rem;
             --space-2: 0.75rem;
             --space-3: 1rem;
             --space-4: 1.25rem;
             --space-5: 1.5rem;
-            --space-6: 2rem;
-            --space-7: 2.5rem;
         }
 
-        * {
-            box-sizing: border-box;
-        }
+        * { box-sizing: border-box; }
 
-        html,
-        body {
+        html, body {
             margin: 0;
             min-height: 100%;
-            font-family: "Noto Sans TC", "Microsoft JhengHei", "Segoe UI", sans-serif;
-            background:
-                radial-gradient(circle at top left, rgba(255, 220, 184, 0.9), transparent 35%),
-                radial-gradient(circle at top right, rgba(165, 220, 210, 0.45), transparent 30%),
-                linear-gradient(180deg, #fbf6ef 0%, #f2e6d6 100%);
-            color: var(--text);
         }
 
         body {
-            padding: var(--space-5);
+            font-family: "Noto Sans TC", "Microsoft JhengHei", "Segoe UI", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(255, 216, 172, 0.88), transparent 34%),
+                radial-gradient(circle at top right, rgba(179, 223, 209, 0.72), transparent 34%),
+                linear-gradient(180deg, #fbf1e5 0%, var(--page) 100%);
+            padding: clamp(0.75rem, 2vw, 1.5rem);
         }
 
-        button,
-        input,
-        select,
-        textarea {
+        button, input, select, textarea {
             font: inherit;
         }
 
@@ -68,329 +57,205 @@
             cursor: pointer;
         }
 
+        [v-cloak] {
+            display: none;
+        }
+
         .shell {
-            width: min(1240px, 100%);
+            width: min(1060px, 100%);
             margin: 0 auto;
             display: grid;
-            gap: var(--space-5);
-        }
-
-        .hero {
-            display: grid;
-            gap: var(--space-4);
-            padding: clamp(1.5rem, 4vw, 2.5rem);
-            background: linear-gradient(135deg, rgba(255, 251, 247, 0.92), rgba(245, 230, 210, 0.92));
-            border: 1px solid rgba(161, 79, 42, 0.15);
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow-lg);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero::after {
-            content: "";
-            position: absolute;
-            inset: auto -4rem -4rem auto;
-            width: 16rem;
-            height: 16rem;
-            background: radial-gradient(circle, rgba(47, 111, 104, 0.24), transparent 70%);
-            pointer-events: none;
-        }
-
-        .hero-header {
-            display: flex;
-            justify-content: space-between;
-            gap: var(--space-4);
-            align-items: start;
-            flex-wrap: wrap;
-        }
-
-        .hero-copy {
-            max-width: 40rem;
-            display: grid;
-            gap: var(--space-2);
-        }
-
-        .eyebrow {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            width: fit-content;
-            padding: 0.45rem 0.8rem;
-            border-radius: 999px;
-            background: rgba(161, 79, 42, 0.09);
-            color: var(--primary-strong);
-            font-size: 0.92rem;
-            font-weight: 700;
-            letter-spacing: 0.04em;
-        }
-
-        h1,
-        h2,
-        h3,
-        p {
-            margin: 0;
-        }
-
-        h1 {
-            font-size: clamp(2rem, 4vw, 3.15rem);
-            line-height: 1.08;
-            letter-spacing: -0.03em;
-        }
-
-        .hero-copy p {
-            color: var(--text-soft);
-            font-size: 1.02rem;
-            line-height: 1.75;
-        }
-
-        .hero-actions {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--space-2);
-            justify-content: flex-end;
-            align-items: start;
-        }
-
-        .stats-grid,
-        .layout-grid {
-            display: grid;
-            gap: var(--space-4);
-        }
-
-        .stats-grid {
-            grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-        }
-
-        .layout-grid {
-            grid-template-columns: minmax(0, 380px) minmax(0, 1fr);
-            align-items: start;
-        }
-
-        .card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-md);
-            -webkit-backdrop-filter: blur(16px);
-            backdrop-filter: blur(16px);
-        }
-
-        .stat-card {
-            padding: var(--space-4);
-            display: grid;
-            gap: 0.35rem;
-        }
-
-        .stat-card .label {
-            color: var(--text-soft);
-            font-size: 0.92rem;
-        }
-
-        .stat-card strong {
-            font-size: clamp(1.5rem, 3vw, 2rem);
+            gap: var(--space-3);
         }
 
         .panel {
-            padding: var(--space-5);
+            background: var(--panel);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-xl);
+            box-shadow: var(--shadow);
+            padding: clamp(1rem, 2.4vw, 1.55rem);
             display: grid;
             gap: var(--space-4);
         }
 
         .panel-header {
             display: flex;
+            align-items: flex-start;
             justify-content: space-between;
-            gap: var(--space-3);
-            align-items: start;
-            flex-wrap: wrap;
+            gap: var(--space-4);
         }
 
-        .panel-header p {
+        h1, h2, h3, p {
+            margin: 0;
+        }
+
+        h1 {
+            font-size: clamp(1.55rem, 4vw, 2rem);
+            line-height: 1.2;
+        }
+
+        .results-meta, .hint, .record-title small {
             color: var(--text-soft);
-            line-height: 1.7;
-        }
-
-        .form-grid {
-            display: grid;
-            gap: var(--space-3);
-        }
-
-        .form-grid.two-columns {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .field {
-            display: grid;
-            gap: 0.45rem;
-        }
-
-        .field label,
-        .field legend {
-            font-weight: 700;
-            font-size: 0.95rem;
-        }
-
-        .field input,
-        .field select,
-        .field textarea,
-        .search-input {
-            width: 100%;
-            min-height: 3rem;
-            padding: 0.85rem 1rem;
-            border: 1px solid rgba(103, 88, 77, 0.18);
-            border-radius: var(--radius-md);
-            background: var(--surface-strong);
-            color: var(--text);
-            transition: border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
-        }
-
-        .field textarea {
-            min-height: 8rem;
-            resize: vertical;
-        }
-
-        .field input:focus,
-        .field select:focus,
-        .field textarea:focus,
-        .search-input:focus {
-            border-color: rgba(47, 111, 104, 0.55);
-            box-shadow: 0 0 0 4px rgba(47, 111, 104, 0.14);
-            outline: none;
-            transform: translateY(-1px);
-        }
-
-        .checkbox-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.7rem;
-            padding: 0;
-            border: 0;
-            margin: 0;
-        }
-
-        .checkbox-chip {
-            display: inline-flex;
-            align-items: center;
-            gap: 0.55rem;
-            padding: 0.75rem 0.95rem;
-            min-height: 44px;
-            border-radius: 999px;
-            border: 1px solid rgba(161, 79, 42, 0.18);
-            background: rgba(255, 255, 255, 0.75);
-            color: var(--text);
-        }
-
-        .checkbox-chip input {
-            width: 1rem;
-            height: 1rem;
-            accent-color: var(--secondary);
-            margin: 0;
-        }
-
-        .button-row,
-        .toolbar,
-        .record-actions,
-        .settings-row {
-            display: flex;
-            flex-wrap: wrap;
-            gap: var(--space-2);
-            align-items: center;
-        }
-
-        .button-row {
-            justify-content: flex-start;
-        }
-
-        .button,
-        .ghost-button,
-        .danger-button,
-        .icon-button {
-            min-height: 44px;
-            padding: 0.85rem 1.15rem;
-            border: 0;
-            border-radius: 999px;
-            font-weight: 700;
-            transition: transform 180ms ease, box-shadow 180ms ease, background-color 180ms ease;
-        }
-
-        .button {
-            background: linear-gradient(135deg, var(--primary), var(--primary-strong));
-            color: #fff;
-            box-shadow: 0 14px 30px rgba(124, 56, 23, 0.2);
-        }
-
-        .ghost-button {
-            background: rgba(255, 255, 255, 0.78);
-            color: var(--text);
-            border: 1px solid rgba(103, 88, 77, 0.16);
-        }
-
-        .danger-button {
-            background: var(--danger-soft);
-            color: var(--danger);
-        }
-
-        .icon-button {
-            padding-inline: 1rem;
-            background: rgba(47, 111, 104, 0.1);
-            color: var(--secondary);
-        }
-
-        .button:hover,
-        .ghost-button:hover,
-        .danger-button:hover,
-        .icon-button:hover {
-            transform: translateY(-2px);
-        }
-
-        .button:focus-visible,
-        .ghost-button:focus-visible,
-        .danger-button:focus-visible,
-        .icon-button:focus-visible {
-            outline: 3px solid rgba(47, 111, 104, 0.25);
-            outline-offset: 2px;
         }
 
         .toolbar {
-            justify-content: space-between;
-        }
-
-        .toolbar-group {
             display: flex;
-            flex-wrap: wrap;
-            gap: var(--space-2);
-        }
-
-        .search-stack {
-            display: grid;
+            justify-content: space-between;
+            align-items: center;
             gap: var(--space-3);
+            flex-wrap: wrap;
         }
 
-        .storage-status {
+        .toolbar-group, .toolbar-side, .record-actions, .record-meta {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            flex-wrap: wrap;
+        }
+
+        .toolbar-side {
+            justify-content: flex-end;
+        }
+
+        .button, .ghost-button, .danger-button, .icon-button {
+            min-height: 44px;
+            border: 0;
+            border-radius: 999px;
+            padding: 0.75rem 1.15rem;
+            font-weight: 700;
+            color: var(--text);
+            transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+        }
+
+        .button {
+            color: #fff;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            box-shadow: 0 14px 28px rgba(120, 54, 23, 0.18);
+        }
+
+        .ghost-button {
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(91, 70, 55, 0.16);
+        }
+
+        .danger-button {
+            color: var(--danger);
+            background: var(--danger-soft);
+        }
+
+        .icon-button {
+            width: 52px;
+            min-width: 52px;
+            padding: 0;
+            color: var(--secondary);
+            background: rgba(47, 118, 111, 0.12);
+            display: inline-grid;
+            place-items: center;
+        }
+
+        .button:hover, .ghost-button:hover, .danger-button:hover, .icon-button:hover {
+            transform: translateY(-1px);
+        }
+
+        .button:focus-visible, .ghost-button:focus-visible, .danger-button:focus-visible, .icon-button:focus-visible,
+        input:focus, select:focus, textarea:focus {
+            outline: 3px solid rgba(47, 118, 111, 0.22);
+            outline-offset: 2px;
+        }
+
+        .icon-button svg {
+            width: 1.2rem;
+            height: 1.2rem;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.9;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .status-pill {
+            min-height: 44px;
             display: inline-flex;
             align-items: center;
-            gap: 0.65rem;
-            width: fit-content;
-            padding: 0.7rem 0.95rem;
+            justify-content: center;
             border-radius: 999px;
-            background: rgba(47, 111, 104, 0.08);
+            padding: 0.72rem 1rem;
             color: var(--secondary);
-            font-size: 0.95rem;
+            background: var(--secondary-soft);
             font-weight: 700;
         }
 
-        .storage-status.warn {
-            background: rgba(161, 79, 42, 0.1);
-            color: var(--primary-strong);
+        .status-pill.warn {
+            color: #9a3838;
+            background: var(--warning-soft);
         }
 
-        .storage-status.error {
-            background: rgba(157, 45, 45, 0.11);
+        .status-pill.error {
             color: var(--danger);
+            background: var(--danger-soft);
         }
 
-        .results-meta {
+        .search-input, .field input, .field select, .field textarea {
+            width: 100%;
+            min-height: 3rem;
+            border: 1px solid rgba(92, 70, 55, 0.16);
+            border-radius: var(--radius-md);
+            background: var(--panel-strong);
+            color: var(--text);
+            padding: 0.85rem 1rem;
+        }
+
+        .date-input-wrap {
+            position: relative;
+        }
+
+        .date-input-icon {
+            position: absolute;
+            top: 50%;
+            right: 1rem;
+            width: 1.1rem;
+            height: 1.1rem;
+            transform: translateY(-50%);
             color: var(--text-soft);
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 1.9;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            pointer-events: none;
+        }
+
+        .field .date-input {
+            cursor: pointer;
+            padding-right: 3rem;
+        }
+
+        .vc-container {
+            --vc-font-family: "Noto Sans TC", "Microsoft JhengHei", "Segoe UI", sans-serif;
+            --vc-accent-50: #f8eee8;
+            --vc-accent-100: #f1dfd3;
+            --vc-accent-200: #e7c4ae;
+            --vc-accent-300: #dba381;
+            --vc-accent-400: #c67848;
+            --vc-accent-500: var(--primary);
+            --vc-accent-600: var(--primary-dark);
+            --vc-accent-700: #612a11;
+            border-color: rgba(92, 70, 55, 0.16);
+            border-radius: var(--radius-lg);
+            box-shadow: 0 18px 42px rgba(86, 56, 34, 0.16);
+        }
+
+        .vc-popover-content {
+            border-radius: var(--radius-lg);
+        }
+
+        .search-input {
+            min-height: 3.35rem;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 7rem;
         }
 
         .records-grid {
@@ -398,27 +263,28 @@
             gap: var(--space-3);
         }
 
+        .record-card, .empty-state {
+            border: 1px solid rgba(162, 77, 36, 0.16);
+            border-radius: var(--radius-lg);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 250, 244, 0.94));
+        }
+
         .record-card {
             display: grid;
             gap: var(--space-3);
             padding: var(--space-4);
-            border-radius: var(--radius-lg);
-            border: 1px solid rgba(161, 79, 42, 0.14);
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 249, 241, 0.92));
-            box-shadow: 0 14px 28px rgba(88, 55, 37, 0.08);
-            transition: transform 180ms ease, box-shadow 180ms ease;
         }
 
-        .record-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 24px 36px rgba(88, 55, 37, 0.12);
+        .record-card.editing {
+            border-color: rgba(47, 118, 111, 0.3);
+            background: linear-gradient(180deg, rgba(250, 255, 253, 0.96), rgba(244, 252, 249, 0.94));
         }
 
         .record-top {
             display: flex;
+            align-items: flex-start;
             justify-content: space-between;
             gap: var(--space-3);
-            align-items: start;
             flex-wrap: wrap;
         }
 
@@ -427,349 +293,434 @@
             gap: 0.35rem;
         }
 
-        .record-title small,
-        .record-note,
-        .empty-state p,
-        .settings-help,
-        .hint {
-            color: var(--text-soft);
-        }
-
-        .record-title h3 {
-            font-size: 1.3rem;
-        }
-
-        .record-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.55rem;
-        }
-
-        .pill {
-            display: inline-flex;
-            align-items: center;
-            min-height: 36px;
-            padding: 0.4rem 0.85rem;
-            border-radius: 999px;
-            font-size: 0.92rem;
-            font-weight: 700;
-            background: var(--secondary-soft);
-            color: var(--secondary);
-        }
-
-        .pill.muted {
-            background: rgba(103, 88, 77, 0.1);
-            color: var(--text-soft);
-        }
-
-        .record-note {
-            padding: 1rem;
+        .record-item, .record-note {
             border-radius: var(--radius-md);
-            background: var(--surface-muted);
-            line-height: 1.7;
+            padding: 1rem;
             white-space: pre-wrap;
             word-break: break-word;
+            line-height: 1.7;
         }
 
         .record-item {
-            padding: 1rem;
-            border-radius: var(--radius-md);
-            background: rgba(161, 79, 42, 0.08);
-            line-height: 1.7;
+            background: rgba(162, 77, 36, 0.08);
             font-weight: 700;
-            white-space: pre-wrap;
-            word-break: break-word;
+        }
+
+        .record-note {
+            background: var(--muted);
+            color: var(--text-soft);
+        }
+
+        .pill {
+            min-height: 36px;
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 0.38rem 0.8rem;
+            color: var(--secondary);
+            background: var(--secondary-soft);
+            font-weight: 700;
+        }
+
+        .pill.muted {
+            color: var(--text-soft);
+            background: rgba(91, 70, 55, 0.1);
         }
 
         .empty-state {
-            padding: clamp(2rem, 5vw, 3.2rem);
-            border-radius: var(--radius-lg);
-            border: 1px dashed rgba(103, 88, 77, 0.25);
-            background: rgba(255, 255, 255, 0.52);
             text-align: center;
             display: grid;
+            gap: var(--space-2);
+            padding: clamp(2.5rem, 7vw, 4.2rem) var(--space-4);
+            border-style: dashed;
+        }
+
+        .editor-form {
+            display: grid;
+            gap: var(--space-3);
+        }
+
+        .form-grid {
+            display: grid;
+            gap: var(--space-3);
+        }
+
+        .form-grid.two {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .field {
+            display: grid;
+            gap: 0.45rem;
+        }
+
+        .field label, .field legend {
+            font-weight: 700;
+        }
+
+        .required-mark {
+            color: var(--danger);
+            margin-left: 0.2rem;
+        }
+
+        fieldset.field {
+            border: 0;
+            padding: 0;
+            margin: 0;
+        }
+
+        .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
             gap: 0.65rem;
         }
 
-        .empty-state h3 {
-            font-size: 1.35rem;
+        .checkbox-chip {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            border: 1px solid rgba(162, 77, 36, 0.16);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.72);
+            padding: 0.68rem 0.9rem;
         }
 
-        .visually-hidden {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            padding: 0;
-            margin: -1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-            border: 0;
+        .checkbox-chip input {
+            width: 1rem;
+            height: 1rem;
+            accent-color: var(--secondary);
         }
 
         .overlay {
             position: fixed;
             inset: 0;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            padding: var(--space-4);
-            background: rgba(38, 27, 18, 0.42);
-            -webkit-backdrop-filter: blur(6px);
-            backdrop-filter: blur(6px);
-            z-index: 20;
-        }
-
-        .overlay[data-open="true"] {
-            display: flex;
+            display: grid;
+            place-items: center;
+            padding: var(--space-3);
+            background: rgba(42, 29, 20, 0.42);
+            z-index: 10;
         }
 
         .modal {
             width: min(720px, 100%);
-            padding: var(--space-5);
+            max-height: min(820px, 92vh);
+            overflow: auto;
+            background: var(--panel-strong);
+            border: 1px solid var(--border);
             border-radius: var(--radius-xl);
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98), rgba(248, 239, 228, 0.97));
-            border: 1px solid rgba(161, 79, 42, 0.16);
-            box-shadow: var(--shadow-lg);
+            box-shadow: var(--shadow);
+            padding: var(--space-5);
             display: grid;
             gap: var(--space-4);
         }
 
-        .settings-list {
+        .settings-section {
+            display: grid;
+            gap: var(--space-3);
+        }
+
+        .settings-actions, .settings-list {
             display: grid;
             gap: var(--space-2);
-            max-height: 320px;
-            overflow: auto;
-            padding-right: 0.35rem;
+        }
+
+        .settings-actions {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
         }
 
         .settings-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            justify-content: space-between;
             gap: var(--space-2);
-            padding: 0.8rem 1rem;
+            border: 1px solid rgba(92, 70, 55, 0.12);
             border-radius: var(--radius-md);
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid rgba(103, 88, 77, 0.12);
+            background: rgba(247, 241, 234, 0.7);
+            padding: 0.75rem 0.9rem;
         }
 
-        .settings-item span {
-            font-weight: 700;
+        .settings-item-actions {
+            display: flex;
+            gap: var(--space-2);
+            flex-wrap: wrap;
         }
 
         .inline-form {
             display: grid;
             grid-template-columns: minmax(0, 1fr) auto;
             gap: var(--space-2);
+            align-items: end;
         }
 
-        @media (max-width: 960px) {
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+        }
+
+        @media (max-width: 760px) {
             body {
-                padding: var(--space-3);
+                padding: var(--space-2);
             }
 
-            .layout-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .hero-header,
-            .toolbar {
+            .panel-header, .toolbar, .toolbar-side, .record-top, .settings-item {
                 flex-direction: column;
                 align-items: stretch;
             }
 
-            .hero-actions,
-            .toolbar-group {
-                justify-content: flex-start;
-            }
-        }
-
-        @media (max-width: 640px) {
-            .panel,
-            .modal {
-                padding: var(--space-4);
-            }
-
-            .form-grid.two-columns,
-            .inline-form {
-                grid-template-columns: 1fr;
-            }
-
-            .record-top,
-            .settings-item {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .record-actions {
-                justify-content: stretch;
-            }
-
-            .record-actions button,
-            .toolbar-group button,
-            .hero-actions button,
-            .button-row button,
-            .settings-item button,
-            .inline-form button {
+            .toolbar-group, .toolbar-side, .record-actions, .settings-item-actions {
                 width: 100%;
             }
-        }
 
-        @media (prefers-reduced-motion: reduce) {
-            *,
-            *::before,
-            *::after {
-                animation: none !important;
-                transition: none !important;
-                scroll-behavior: auto !important;
+            .toolbar-group button, .toolbar-side button, .record-actions button, .settings-actions button,
+            .inline-form button, .settings-item-actions button {
+                width: 100%;
+            }
+
+            .status-pill {
+                width: 100%;
+            }
+
+            .form-grid.two, .inline-form {
+                grid-template-columns: 1fr;
+            }
+
+            .record-card, .panel, .modal {
+                padding: var(--space-3);
             }
         }
     </style>
 </head>
 <body>
-    <main class="shell">
-        <section class="hero" aria-labelledby="page-title">
-            <div class="hero-header">
-                <div class="hero-copy">
-                    <span class="eyebrow">QuickNote / 客戶備忘錄</span>
-                    <h1 id="page-title">把客戶、地址、送貨方式與備註集中在同一頁。</h1>
-                    <p>直接用瀏覽器打開這個單一 HTML 檔即可使用。除了客戶、地址與送貨方式，也能記錄哪一天要出什麼貨，再把資料寫進桌面 JSON 檔，不依賴 SQL。</p>
-                </div>
-                <div class="hero-actions" aria-label="資料操作">
-                    <button class="ghost-button" type="button" id="openFileButton">開啟資料檔</button>
-                    <button class="ghost-button" type="button" id="saveAsButton">另存資料檔</button>
-                    <button class="button" type="button" id="saveButton">存檔</button>
-                    <button class="ghost-button" type="button" id="exportButton">匯出 JSON</button>
-                    <button class="ghost-button" type="button" id="importButton">匯入 JSON</button>
-                    <button class="icon-button" type="button" id="settingsButton" aria-haspopup="dialog" aria-controls="settingsOverlay">送貨方式設定</button>
-                </div>
-            </div>
-            <div class="stats-grid" aria-label="資料摘要">
-                <article class="stat-card card">
-                    <span class="label">目前總筆數</span>
-                    <strong id="totalCount">0</strong>
-                </article>
-                <article class="stat-card card">
-                    <span class="label">搜尋後顯示</span>
-                    <strong id="filteredCount">0</strong>
-                </article>
-                <article class="stat-card card">
-                    <span class="label">送貨方式選項</span>
-                    <strong id="shippingCount">0</strong>
-                </article>
-                <article class="stat-card card">
-                    <span class="label">最後更新時間</span>
-                    <strong id="lastUpdated">尚未建立</strong>
-                </article>
-            </div>
-        </section>
-
-        <div class="layout-grid">
-            <section class="panel card" aria-labelledby="form-title">
+    <div id="app" v-cloak>
+        <main class="shell">
+            <section class="panel" aria-labelledby="recordsTitle">
                 <div class="panel-header">
                     <div>
-                        <h2 id="form-title">新增紀錄</h2>
-                        <p>用來快速記住哪一天要出什麼貨、送到哪裡、用什麼方式送，再補上備註。</p>
+                        <h1 id="recordsTitle">紀錄列表</h1>
                     </div>
-                    <div class="storage-status warn" id="storageStatus">目前只存在瀏覽器暫存</div>
+                    <div class="results-meta">{{ resultsMeta }}</div>
                 </div>
 
-                <form id="recordForm" class="form-grid" novalidate>
-                    <div class="form-grid two-columns">
-                        <div class="field">
-                            <label for="customerName">客戶名</label>
-                            <input id="customerName" name="customerName" autocomplete="off" placeholder="例如：王小姐" required>
-                        </div>
-                        <div class="field">
-                            <label for="deliveryDate">出貨日期</label>
-                            <input id="deliveryDate" name="deliveryDate" type="date" required>
-                        </div>
+                <div class="toolbar">
+                    <div class="toolbar-group">
+                        <button class="button" type="button" @click="startCreate">新增紀錄</button>
+                        <button class="ghost-button" type="button" @click="clearSearch">清除搜尋</button>
                     </div>
-
-                    <div class="field">
-                        <label for="itemInput">貨品內容</label>
-                        <textarea id="itemInput" name="itemInput" placeholder="例如：中秋禮盒 3 組、常溫兩箱" required></textarea>
+                    <div class="toolbar-side">
+                        <button class="icon-button" type="button" aria-label="設定" @click="openSettings">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">
+                                <circle cx="12" cy="12" r="3.2"></circle>
+                                <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a2 2 0 1 1-4 0v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H4a2 2 0 1 1 0-4h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V4a2 2 0 1 1 4 0v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6h.2a2 2 0 1 1 0 4h-.2a1 1 0 0 0-.9.6z"></path>
+                            </svg>
+                        </button>
                     </div>
+                </div>
 
-                    <div class="form-grid two-columns">
-                        <div class="field">
-                            <label for="citySelect">縣市</label>
-                            <select id="citySelect" name="citySelect" required></select>
-                        </div>
-                        <div class="field">
-                            <label for="districtSelect">行政區</label>
-                            <select id="districtSelect" name="districtSelect" required disabled></select>
-                        </div>
+                <label class="visually-hidden" for="searchInput">搜尋</label>
+                <input id="searchInput" class="search-input" v-model.trim="searchQuery" type="search" autocomplete="off" placeholder="搜尋客戶名、日期、貨品、行政區、送貨方式或備註">
+
+                <div class="records-grid">
+                    <article v-if="isCreating" class="record-card editing">
+                        <record-editor
+                            :form="editorForm"
+                            :city-options="cityOptions"
+                            :district-options="districtOptions"
+                            :shipping-options="state.shippingOptions"
+                            mode="create"
+                            @save="submitEditor"
+                            @cancel="cancelEditor"
+                        ></record-editor>
+                    </article>
+
+                    <article v-for="record in filteredRecords" :key="record.id" class="record-card" :class="{ editing: editingId === record.id }">
+                        <record-editor
+                            v-if="editingId === record.id"
+                            :form="editorForm"
+                            :city-options="cityOptions"
+                            :district-options="districtOptions"
+                            :shipping-options="state.shippingOptions"
+                            mode="edit"
+                            @save="submitEditor"
+                            @cancel="cancelEditor"
+                            @delete="deleteRecord(record.id)"
+                        ></record-editor>
+
+                        <template v-else>
+                            <div class="record-top">
+                                <div class="record-title">
+                                    <h3>{{ record.name }}</h3>
+                                    <small>{{ record.city }}{{ record.district }}</small>
+                                </div>
+                                <div class="record-actions">
+                                    <button class="ghost-button" type="button" @click="startEdit(record)">編輯</button>
+                                    <button class="danger-button" type="button" @click="deleteRecord(record.id)">刪除</button>
+                                </div>
+                            </div>
+                            <div class="record-meta">
+                                <span class="pill muted">出貨：{{ record.deliveryDate ? formatDeliveryDate(record.deliveryDate) : '未設定日期' }}</span>
+                                <span v-if="!record.shipping.length" class="pill muted">未選擇送貨方式</span>
+                                <span v-for="item in record.shipping" :key="item" class="pill">{{ item }}</span>
+                            </div>
+                            <div class="record-item">{{ record.item || '尚未填寫貨品內容' }}</div>
+                            <div class="record-note">{{ record.note || '尚未填寫備註' }}</div>
+                            <div class="record-meta">
+                                <span class="pill muted">建立：{{ formatDateTime(record.createdAt) }}</span>
+                                <span v-if="hasUpdated(record)" class="pill muted">更新：{{ formatDateTime(record.updatedAt) }}</span>
+                            </div>
+                        </template>
+                    </article>
+
+                    <div v-if="!isCreating && !filteredRecords.length" class="empty-state">
+                        <h3>{{ state.records.length ? '找不到符合條件的資料' : '還沒有客戶資料' }}</h3>
+                        <p>{{ state.records.length ? '可以換個關鍵字，或直接按新增紀錄插入一張新的空白卡片。' : '先按新增紀錄，列表最上方就會出現一張可直接輸入的空白卡片。' }}</p>
                     </div>
-
-                    <fieldset class="field">
-                        <legend>送貨方式</legend>
-                        <div id="shippingOptions" class="checkbox-group" role="group" aria-label="送貨方式選項"></div>
-                        <p class="hint">若要新增或刪除送貨方式，請點右上角「送貨方式設定」。</p>
-                    </fieldset>
-
-                    <div class="field">
-                        <label for="noteInput">備註</label>
-                        <textarea id="noteInput" name="noteInput" placeholder="例如：6/8 要出兩箱，上午前送到比較方便。"></textarea>
-                    </div>
-
-                    <div class="button-row">
-                        <button class="button" type="submit" id="submitButton">儲存紀錄</button>
-                        <button class="ghost-button" type="button" id="cancelEditButton" hidden>取消編輯</button>
-                    </div>
-                </form>
+                </div>
             </section>
+        </main>
 
-            <section class="panel card" aria-labelledby="records-title">
+        <div v-if="showSettings" class="overlay" role="presentation" @click.self="closeSettings">
+            <section class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
                 <div class="panel-header">
                     <div>
-                        <h2 id="records-title">紀錄列表</h2>
-                        <p>搜尋框會同時比對客戶名、地址、送貨方式與備註。</p>
+                        <h2 id="settingsTitle">設定</h2>
                     </div>
-                    <div class="results-meta" id="resultsMeta">尚未建立任何紀錄</div>
+                    <button class="ghost-button" type="button" @click="closeSettings">關閉</button>
                 </div>
 
-                <div class="search-stack">
-                    <label class="visually-hidden" for="searchInput">搜尋紀錄</label>
-                    <input class="search-input" id="searchInput" type="search" autocomplete="off" placeholder="搜尋客戶名、行政區、送貨方式或備註">
-                    <div class="toolbar">
-                        <div class="toolbar-group">
-                            <button class="ghost-button" type="button" id="clearSearchButton">清除搜尋</button>
-                            <button class="ghost-button" type="button" id="clearAllButton">清空全部紀錄</button>
+                <section class="settings-section" aria-labelledby="dataActionsTitle">
+                    <div>
+                        <h3 id="dataActionsTitle">資料操作</h3>
+                    </div>
+                    <div class="settings-actions">
+                        <button class="ghost-button" type="button" @click="openDataFile">開啟資料檔</button>
+                        <button class="ghost-button" type="button" @click="saveAsDataFile">另存資料檔</button>
+                        <button class="button" type="button" @click="manualSave">存檔</button>
+                        <button class="ghost-button" type="button" @click="exportJsonFile">匯出 JSON</button>
+                        <button class="ghost-button" type="button" @click="openImportDialog">匯入 JSON</button>
+                        <button class="danger-button" type="button" @click="clearAllRecords">清空全部紀錄</button>
+                    </div>
+                </section>
+
+                <section class="settings-section" aria-labelledby="shippingSettingsTitle">
+                    <div>
+                        <h3 id="shippingSettingsTitle">送貨方式設定</h3>
+                    </div>
+                    <form class="inline-form" @submit.prevent="addShippingOption">
+                        <div class="field">
+                            <label for="shippingOptionInput">新增送貨方式</label>
+                            <input id="shippingOptionInput" v-model.trim="newShippingOption" autocomplete="off" placeholder="例如：黑貓宅配">
+                        </div>
+                        <button class="button" type="submit">新增選項</button>
+                    </form>
+                    <div class="settings-list">
+                        <div v-if="!state.shippingOptions.length" class="empty-state">
+                            <h3>尚無送貨方式</h3>
+                        </div>
+                        <div v-for="option in state.shippingOptions" :key="option" class="settings-item">
+                            <strong>{{ option }}</strong>
+                            <div class="settings-item-actions">
+                                <button class="ghost-button" type="button" @click="renameShippingOption(option)">改名</button>
+                                <button class="danger-button" type="button" @click="deleteShippingOption(option)">刪除</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-
-                <div class="records-grid" id="recordsGrid" aria-live="polite"></div>
+                </section>
             </section>
         </div>
-    </main>
 
-    <div class="overlay" id="settingsOverlay" data-open="false" role="presentation">
-        <section class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-            <div class="panel-header">
-                <div>
-                    <h2 id="settingsTitle">送貨方式設定</h2>
-                    <p class="settings-help">這裡新增或刪除的送貨方式，會直接反映到表單勾選群，也會一起寫進 JSON 資料檔。</p>
-                </div>
-                <button class="ghost-button" type="button" id="closeSettingsButton">關閉</button>
-            </div>
-
-            <form class="inline-form" id="shippingOptionForm">
-                <div class="field">
-                    <label for="shippingOptionInput">新增送貨方式</label>
-                    <input id="shippingOptionInput" autocomplete="off" placeholder="例如：黑貓宅配">
-                </div>
-                <button class="button" type="submit">新增選項</button>
-            </form>
-
-            <div class="settings-list" id="settingsList"></div>
-        </section>
+        <input ref="importInput" type="file" accept="application/json,.json" hidden @change="importJsonFile">
     </div>
 
-    <input id="importInput" type="file" accept="application/json,.json" hidden>
+    <template id="record-editor-template">
+        <form class="editor-form" @submit.prevent="$emit('save')">
+            <div class="record-top">
+                <div class="record-title">
+                    <h3>{{ mode === 'create' ? '新增紀錄' : '編輯紀錄' }}</h3>
+                    <small>{{ mode === 'create' ? '這張空白卡片就是新的輸入區塊。' : '直接在原本位置修改。' }}</small>
+                </div>
+                <div class="record-actions">
+                    <button class="button" type="submit">{{ mode === 'create' ? '儲存新增' : '儲存修改' }}</button>
+                    <button class="ghost-button" type="button" @click="$emit('cancel')">取消</button>
+                    <button v-if="mode === 'edit'" class="danger-button" type="button" @click="$emit('delete')">刪除</button>
+                </div>
+            </div>
 
+            <div class="form-grid two">
+                <div class="field">
+                    <label>客戶名<span class="required-mark" aria-hidden="true">*</span></label>
+                    <input data-editor-autofocus v-model.trim="form.name" autocomplete="off" placeholder="例如：王小姐" required aria-required="true">
+                </div>
+                <div class="field">
+                    <label>出貨日期</label>
+                    <v-date-picker
+                        v-model.string="form.deliveryDate"
+                        :masks="{ input: 'YYYY / MM / DD', modelValue: 'YYYY-MM-DD' }"
+                        :popover="{ visibility: 'click', placement: 'bottom-start' }"
+                    >
+                        <template #default="{ inputValue, inputEvents }">
+                            <div class="date-input-wrap">
+                                <input class="date-input" :value="inputValue" v-on="inputEvents" readonly placeholder="請選擇出貨日期">
+                                <svg class="date-input-icon" viewBox="0 0 24 24" aria-hidden="true">
+                                    <path d="M8 2v4"></path>
+                                    <path d="M16 2v4"></path>
+                                    <path d="M3.5 9h17"></path>
+                                    <rect x="4" y="5" width="16" height="16" rx="2"></rect>
+                                </svg>
+                            </div>
+                        </template>
+                    </v-date-picker>
+                </div>
+            </div>
+
+            <div class="field">
+                <label>貨品內容</label>
+                <textarea v-model.trim="form.item" placeholder="例如：禮盒 2 組、常溫一箱"></textarea>
+            </div>
+
+            <div class="form-grid two">
+                <div class="field">
+                    <label>縣市</label>
+                    <select v-model="form.city">
+                        <option value="">請選擇縣市</option>
+                        <option v-for="city in cityOptions" :key="city" :value="city">{{ city }}</option>
+                    </select>
+                </div>
+                <div class="field">
+                    <label>行政區</label>
+                    <select v-model="form.district" :disabled="!districtOptions.length">
+                        <option value="">{{ districtOptions.length ? '請選擇行政區' : '請先選擇縣市' }}</option>
+                        <option v-for="district in districtOptions" :key="district" :value="district">{{ district }}</option>
+                    </select>
+                </div>
+            </div>
+
+            <fieldset class="field">
+                <legend>送貨方式</legend>
+                <div class="checkbox-group">
+                    <label v-for="option in shippingOptions" :key="option" class="checkbox-chip">
+                        <input v-model="form.shipping" type="checkbox" :value="option">
+                        <span>{{ option }}</span>
+                    </label>
+                </div>
+                <p class="hint">送貨方式可到設定增減或改名。</p>
+            </fieldset>
+
+            <div class="field">
+                <label>備註</label>
+                <textarea v-model.trim="form.note" placeholder="例如：上午前送到比較方便。"></textarea>
+            </div>
+        </form>
+    </template>
+
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <script src="https://unpkg.com/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+    <script>window.PopperCore = window.Popper;</script>
+    <script src="https://unpkg.com/v-calendar@3.1.2/dist/iife/index.js"></script>
     <script>
         const DISTRICTS = {
             "台北市": ["中正區", "大同區", "中山區", "松山區", "大安區", "萬華區", "信義區", "士林區", "北投區", "內湖區", "南港區", "文山區"],
@@ -797,158 +748,25 @@
         };
 
         const DEFAULT_SHIPPING_OPTIONS = ["自送", "自取", "華誠(小)", "華誠(中)", "華誠(大)", "D.Y.", "D", "東宜", "大粲"];
-        const STORAGE_KEY = "quicknote-state-v1";
+        const STORAGE_KEY = "quicknote-state-v2";
+        const LEGACY_STORAGE_KEY = "quicknote-state-v1";
         const HANDLE_DB_NAME = "quicknote-file-handles";
         const HANDLE_STORE_NAME = "handles";
         const HANDLE_KEY = "primary-data-file";
 
-        const state = loadInitialState();
-
-        let currentEditId = null;
-        let fileHandle = null;
-        let storageMode = "local";
-
-        const elements = {
-            totalCount: document.getElementById("totalCount"),
-            filteredCount: document.getElementById("filteredCount"),
-            shippingCount: document.getElementById("shippingCount"),
-            lastUpdated: document.getElementById("lastUpdated"),
-            formTitle: document.getElementById("form-title"),
-            resultsMeta: document.getElementById("resultsMeta"),
-            storageStatus: document.getElementById("storageStatus"),
-            recordForm: document.getElementById("recordForm"),
-            customerName: document.getElementById("customerName"),
-            deliveryDate: document.getElementById("deliveryDate"),
-            itemInput: document.getElementById("itemInput"),
-            citySelect: document.getElementById("citySelect"),
-            districtSelect: document.getElementById("districtSelect"),
-            noteInput: document.getElementById("noteInput"),
-            shippingOptions: document.getElementById("shippingOptions"),
-            submitButton: document.getElementById("submitButton"),
-            cancelEditButton: document.getElementById("cancelEditButton"),
-            searchInput: document.getElementById("searchInput"),
-            clearSearchButton: document.getElementById("clearSearchButton"),
-            clearAllButton: document.getElementById("clearAllButton"),
-            recordsGrid: document.getElementById("recordsGrid"),
-            openFileButton: document.getElementById("openFileButton"),
-            saveAsButton: document.getElementById("saveAsButton"),
-            saveButton: document.getElementById("saveButton"),
-            exportButton: document.getElementById("exportButton"),
-            importButton: document.getElementById("importButton"),
-            importInput: document.getElementById("importInput"),
-            settingsButton: document.getElementById("settingsButton"),
-            closeSettingsButton: document.getElementById("closeSettingsButton"),
-            settingsOverlay: document.getElementById("settingsOverlay"),
-            settingsList: document.getElementById("settingsList"),
-            shippingOptionForm: document.getElementById("shippingOptionForm"),
-            shippingOptionInput: document.getElementById("shippingOptionInput")
-        };
-
-        init();
-
-        function init() {
-            renderCitySelect();
-            renderShippingOptions();
-            bindEvents();
-            renderAll();
-            void restoreSavedFileHandle();
-        }
-
-        function bindEvents() {
-            elements.recordForm.addEventListener("submit", handleRecordSubmit);
-            elements.citySelect.addEventListener("change", handleCityChange);
-            elements.cancelEditButton.addEventListener("click", resetForm);
-            elements.searchInput.addEventListener("input", renderRecords);
-            elements.clearSearchButton.addEventListener("click", clearSearch);
-            elements.clearAllButton.addEventListener("click", clearAllRecords);
-            elements.openFileButton.addEventListener("click", openDataFile);
-            elements.saveAsButton.addEventListener("click", saveAsDataFile);
-            elements.saveButton.addEventListener("click", manualSave);
-            elements.exportButton.addEventListener("click", exportJsonFile);
-            elements.importButton.addEventListener("click", () => elements.importInput.click());
-            elements.importInput.addEventListener("change", importJsonFile);
-            elements.settingsButton.addEventListener("click", openSettings);
-            elements.closeSettingsButton.addEventListener("click", closeSettings);
-            elements.settingsOverlay.addEventListener("click", (event) => {
-                if (event.target === elements.settingsOverlay) {
-                    closeSettings();
-                }
-            });
-            elements.shippingOptionForm.addEventListener("submit", handleShippingOptionSubmit);
-            document.addEventListener("keydown", (event) => {
-                if (event.key === "Escape" && elements.settingsOverlay.dataset.open === "true") {
-                    closeSettings();
-                }
-            });
-        }
-
-        function loadInitialState() {
-            try {
-                const cached = localStorage.getItem(STORAGE_KEY);
-                if (!cached) {
-                    return createDefaultState();
-                }
-                return normalizeState(JSON.parse(cached));
-            } catch {
-                return createDefaultState();
-            }
-        }
+        const { createApp, reactive, ref, computed, watch, nextTick } = Vue;
 
         function createDefaultState() {
-            return {
-                shippingOptions: [...DEFAULT_SHIPPING_OPTIONS],
-                records: []
-            };
+            return { shippingOptions: [...DEFAULT_SHIPPING_OPTIONS], records: [] };
         }
 
-        function normalizeState(raw) {
-            const next = createDefaultState();
-            const incomingOptions = Array.isArray(raw?.shippingOptions) ? raw.shippingOptions : DEFAULT_SHIPPING_OPTIONS;
-            next.shippingOptions = uniqueTrimmedList(incomingOptions, DEFAULT_SHIPPING_OPTIONS);
-            next.records = Array.isArray(raw?.records)
-                ? raw.records
-                    .map(normalizeRecord)
-                    .filter(Boolean)
-                    .sort((left, right) => new Date(right.updatedAt) - new Date(left.updatedAt))
-                : [];
-            return next;
-        }
-
-        function normalizeRecord(record) {
-            if (!record || typeof record !== "object") {
-                return null;
-            }
-            const name = String(record.name ?? "").trim();
-            const city = String(record.city ?? "").trim();
-            const district = String(record.district ?? "").trim();
-            if (!name || !city || !district) {
-                return null;
-            }
-            return {
-                id: String(record.id ?? createId()),
-                name,
-                deliveryDate: normalizeDateValue(record.deliveryDate),
-                item: String(record.item ?? "").trim(),
-                city,
-                district,
-                shipping: uniqueTrimmedList(record.shipping, []),
-                note: String(record.note ?? "").trim(),
-                createdAt: isValidDate(record.createdAt) ? record.createdAt : new Date().toISOString(),
-                updatedAt: isValidDate(record.updatedAt) ? record.updatedAt : new Date().toISOString()
-            };
-        }
-
-        function uniqueTrimmedList(values, fallback) {
+        function uniqueTrimmedList(values, fallback = []) {
             const source = Array.isArray(values) ? values : fallback;
             return [...new Set(source.map((item) => String(item ?? "").trim()).filter(Boolean))];
         }
 
         function normalizeDateValue(value) {
-            if (typeof value !== "string") {
-                return "";
-            }
-            const trimmed = value.trim();
-            return /^\d{4}-\d{2}-\d{2}$/.test(trimmed) ? trimmed : "";
+            return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value.trim()) ? value.trim() : "";
         }
 
         function isValidDate(value) {
@@ -956,539 +774,85 @@
         }
 
         function createId() {
-            if (window.crypto?.randomUUID) {
-                return window.crypto.randomUUID();
-            }
-            return `id-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
+            return window.crypto && typeof window.crypto.randomUUID === "function"
+                ? window.crypto.randomUUID()
+                : `id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
         }
 
-        function renderAll() {
-            renderShippingOptions();
-            renderSettingsList();
-            renderRecords();
-            renderSummary();
+        function normalizeRecord(record) {
+            if (!record || typeof record !== "object") return null;
+            const name = String(record.name ?? "").trim();
+            const city = String(record.city ?? "").trim();
+            const district = String(record.district ?? "").trim();
+            if (!name) return null;
+            const createdAt = isValidDate(record.createdAt) ? record.createdAt : new Date().toISOString();
+            const updatedAt = record.updatedAt && isValidDate(record.updatedAt) ? record.updatedAt : createdAt;
+            return {
+                id: String(record.id ?? createId()),
+                name,
+                deliveryDate: normalizeDateValue(record.deliveryDate),
+                item: String(record.item ?? "").trim(),
+                city,
+                district,
+                shipping: uniqueTrimmedList(record.shipping),
+                note: String(record.note ?? "").trim(),
+                createdAt,
+                updatedAt
+            };
         }
 
-        function renderCitySelect(selectedCity = "", selectedDistrict = "") {
-            const cityNames = Object.keys(DISTRICTS);
-            elements.citySelect.innerHTML = [
-                '<option value="">請選擇縣市</option>',
-                ...cityNames.map((city) => `<option value="${escapeAttribute(city)}">${escapeHtml(city)}</option>`)
-            ].join("");
-            elements.citySelect.value = selectedCity;
-            renderDistrictSelect(selectedCity, selectedDistrict);
+        function normalizeState(raw) {
+            const next = createDefaultState();
+            next.shippingOptions = uniqueTrimmedList(raw?.shippingOptions, DEFAULT_SHIPPING_OPTIONS);
+            next.records = Array.isArray(raw?.records)
+                ? raw.records.map(normalizeRecord).filter(Boolean).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
+                : [];
+            return next;
         }
 
-        function renderDistrictSelect(city, selectedDistrict = "") {
-            const districts = city ? DISTRICTS[city] ?? [] : [];
-            elements.districtSelect.disabled = districts.length === 0;
-            elements.districtSelect.innerHTML = [
-                `<option value="">${districts.length ? "請選擇行政區" : "請先選擇縣市"}</option>`,
-                ...districts.map((district) => `<option value="${escapeAttribute(district)}">${escapeHtml(district)}</option>`)
-            ].join("");
-            if (selectedDistrict && districts.includes(selectedDistrict)) {
-                elements.districtSelect.value = selectedDistrict;
-            }
-        }
-
-        function renderShippingOptions(selected = null) {
-            const selectedValues = new Set(selected ?? getSelectedShippingValues());
-            elements.shippingOptions.innerHTML = state.shippingOptions.length
-                ? state.shippingOptions.map((option) => `
-                    <label class="checkbox-chip">
-                        <input type="checkbox" name="shipping" value="${escapeAttribute(option)}" ${selectedValues.has(option) ? "checked" : ""}>
-                        <span>${escapeHtml(option)}</span>
-                    </label>
-                `).join("")
-                : '<p class="hint">目前沒有送貨方式，請先到設定新增選項。</p>';
-        }
-
-        function renderSettingsList() {
-            if (!state.shippingOptions.length) {
-                elements.settingsList.innerHTML = '<div class="empty-state"><h3>尚無送貨方式</h3><p>先新增一個選項，表單就會同步出現可勾選的送貨方式。</p></div>';
-                return;
-            }
-
-            elements.settingsList.innerHTML = state.shippingOptions.map((option) => `
-                <div class="settings-item">
-                    <span>${escapeHtml(option)}</span>
-                    <button class="danger-button" type="button" data-option-delete="${escapeAttribute(option)}">刪除</button>
-                </div>
-            `).join("");
-
-            elements.settingsList.querySelectorAll("[data-option-delete]").forEach((button) => {
-                button.addEventListener("click", () => deleteShippingOption(button.dataset.optionDelete));
-            });
-        }
-
-        function renderSummary(filteredRecords = null) {
-            const records = filteredRecords ?? getFilteredRecords();
-            const latest = state.records[0]?.updatedAt;
-
-            elements.totalCount.textContent = String(state.records.length);
-            elements.filteredCount.textContent = String(records.length);
-            elements.shippingCount.textContent = String(state.shippingOptions.length);
-            elements.lastUpdated.textContent = latest ? formatDateTime(latest) : "尚未建立";
-        }
-
-        function renderRecords() {
-            const records = getFilteredRecords();
-            renderSummary(records);
-
-            if (!state.records.length) {
-                elements.resultsMeta.textContent = "尚未建立任何紀錄";
-                elements.recordsGrid.innerHTML = `
-                    <div class="empty-state">
-                        <h3>還沒有客戶資料</h3>
-                        <p>從左側表單開始新增第一筆資料，之後就能搜尋、編輯與刪除。</p>
-                    </div>
-                `;
-                return;
-            }
-
-            elements.resultsMeta.textContent = records.length
-                ? `共顯示 ${records.length} / ${state.records.length} 筆紀錄`
-                : `搜尋不到符合條件的資料，目前總共有 ${state.records.length} 筆紀錄`;
-
-            if (!records.length) {
-                elements.recordsGrid.innerHTML = `
-                    <div class="empty-state">
-                        <h3>找不到符合條件的資料</h3>
-                        <p>可以試試看客戶名、行政區、送貨方式或備註關鍵字。</p>
-                    </div>
-                `;
-                return;
-            }
-
-            elements.recordsGrid.innerHTML = records.map((record) => `
-                <article class="record-card">
-                    <div class="record-top">
-                        <div class="record-title">
-                            <h3>${escapeHtml(record.name)}</h3>
-                            <small>${escapeHtml(record.city + record.district)}</small>
-                        </div>
-                        <div class="record-actions">
-                            <button class="ghost-button" type="button" data-edit-id="${escapeAttribute(record.id)}">編輯</button>
-                            <button class="danger-button" type="button" data-delete-id="${escapeAttribute(record.id)}">刪除</button>
-                        </div>
-                    </div>
-                    <div class="record-meta">
-                        <span class="pill muted">出貨：${record.deliveryDate ? formatDeliveryDate(record.deliveryDate) : "未設定日期"}</span>
-                        ${record.shipping.length
-                            ? record.shipping.map((item) => `<span class="pill">${escapeHtml(item)}</span>`).join("")
-                            : '<span class="pill muted">未選擇送貨方式</span>'}
-                    </div>
-                    <div class="record-item">${record.item ? escapeHtml(record.item) : "尚未填寫貨品內容"}</div>
-                    <div class="record-note">${record.note ? escapeHtml(record.note) : "尚未填寫備註"}</div>
-                    <div class="record-meta">
-                        <span class="pill muted">建立：${formatDateTime(record.createdAt)}</span>
-                        <span class="pill muted">更新：${formatDateTime(record.updatedAt)}</span>
-                    </div>
-                </article>
-            `).join("");
-
-            elements.recordsGrid.querySelectorAll("[data-edit-id]").forEach((button) => {
-                button.addEventListener("click", () => startEdit(button.dataset.editId));
-            });
-
-            elements.recordsGrid.querySelectorAll("[data-delete-id]").forEach((button) => {
-                button.addEventListener("click", () => deleteRecord(button.dataset.deleteId));
-            });
-        }
-
-        function getFilteredRecords() {
-            const query = elements.searchInput.value.trim().toLowerCase();
-            if (!query) {
-                return [...state.records];
-            }
-
-            return state.records.filter((record) => {
-                const haystack = [
-                    record.name,
-                    record.deliveryDate,
-                    formatDeliveryDate(record.deliveryDate),
-                    record.item,
-                    `${record.city}${record.district}`,
-                    `${record.city} ${record.district}`,
-                    record.shipping.join(" "),
-                    record.note
-                ].join("\n").toLowerCase();
-                return haystack.includes(query);
-            });
-        }
-
-        function handleCityChange() {
-            renderDistrictSelect(elements.citySelect.value);
-        }
-
-        async function handleRecordSubmit(event) {
-            event.preventDefault();
-            const formData = getFormData();
-            if (!formData) {
-                return;
-            }
-
-            const timestamp = new Date().toISOString();
-            if (currentEditId) {
-                const index = state.records.findIndex((record) => record.id === currentEditId);
-                if (index !== -1) {
-                    state.records[index] = {
-                        ...state.records[index],
-                        ...formData,
-                        updatedAt: timestamp
-                    };
-                }
-                setStorageStatus("已更新紀錄", "local");
-            } else {
-                state.records.unshift({
-                    id: createId(),
-                    ...formData,
-                    createdAt: timestamp,
-                    updatedAt: timestamp
-                });
-                setStorageStatus("已新增紀錄", "local");
-            }
-
-            sortRecords();
-            persistLocalState();
-            renderAll();
-            resetForm();
-            await autoSaveIfPossible();
-        }
-
-        function getFormData() {
-            const name = elements.customerName.value.trim();
-            const deliveryDate = elements.deliveryDate.value;
-            const item = elements.itemInput.value.trim();
-            const city = elements.citySelect.value;
-            const district = elements.districtSelect.value;
-            const shipping = getSelectedShippingValues();
-            const note = elements.noteInput.value.trim();
-
-            if (!name) {
-                window.alert("請先填寫客戶名。");
-                elements.customerName.focus();
-                return null;
-            }
-
-            if (!city) {
-                window.alert("請先選擇縣市。");
-                elements.citySelect.focus();
-                return null;
-            }
-
-            if (!deliveryDate) {
-                window.alert("請先選擇出貨日期。");
-                elements.deliveryDate.focus();
-                return null;
-            }
-
-            if (!item) {
-                window.alert("請先填寫貨品內容。");
-                elements.itemInput.focus();
-                return null;
-            }
-
-            if (!district) {
-                window.alert("請先選擇行政區。");
-                elements.districtSelect.focus();
-                return null;
-            }
-
-            return { name, deliveryDate, item, city, district, shipping, note };
-        }
-
-        function getSelectedShippingValues() {
-            return Array.from(document.querySelectorAll('input[name="shipping"]:checked')).map((input) => input.value);
-        }
-
-        function startEdit(recordId) {
-            const record = state.records.find((item) => item.id === recordId);
-            if (!record) {
-                return;
-            }
-
-            currentEditId = record.id;
-            elements.formTitle.textContent = "編輯紀錄";
-            elements.submitButton.textContent = "更新紀錄";
-            elements.cancelEditButton.hidden = false;
-            elements.customerName.value = record.name;
-            elements.deliveryDate.value = record.deliveryDate;
-            elements.itemInput.value = record.item;
-            renderCitySelect(record.city, record.district);
-            elements.noteInput.value = record.note;
-            renderShippingOptions(record.shipping);
-            elements.customerName.focus();
-        }
-
-        function resetForm() {
-            currentEditId = null;
-            elements.formTitle.textContent = "新增紀錄";
-            elements.submitButton.textContent = "儲存紀錄";
-            elements.cancelEditButton.hidden = true;
-            elements.recordForm.reset();
-            renderCitySelect();
-            renderShippingOptions();
-        }
-
-        async function deleteRecord(recordId) {
-            const record = state.records.find((item) => item.id === recordId);
-            if (!record) {
-                return;
-            }
-
-            const confirmed = window.confirm(`確定要刪除「${record.name}」這筆紀錄嗎？`);
-            if (!confirmed) {
-                return;
-            }
-
-            state.records.splice(state.records.findIndex((item) => item.id === recordId), 1);
-            if (currentEditId === recordId) {
-                resetForm();
-            }
-            persistLocalState();
-            renderAll();
-            setStorageStatus("已刪除紀錄", "local");
-            await autoSaveIfPossible();
-        }
-
-        function clearSearch() {
-            elements.searchInput.value = "";
-            renderRecords();
-        }
-
-        async function clearAllRecords() {
-            if (!state.records.length) {
-                return;
-            }
-            const confirmed = window.confirm("確定要清空全部紀錄嗎？這個動作無法復原。");
-            if (!confirmed) {
-                return;
-            }
-
-            state.records = [];
-            resetForm();
-            persistLocalState();
-            renderAll();
-            setStorageStatus("已清空全部紀錄", "local");
-            await autoSaveIfPossible();
-        }
-
-        async function handleShippingOptionSubmit(event) {
-            event.preventDefault();
-            const value = elements.shippingOptionInput.value.trim();
-            if (!value) {
-                elements.shippingOptionInput.focus();
-                return;
-            }
-            if (state.shippingOptions.includes(value)) {
-                window.alert("這個送貨方式已經存在。");
-                elements.shippingOptionInput.focus();
-                return;
-            }
-
-            state.shippingOptions.push(value);
-            state.shippingOptions.sort((left, right) => left.localeCompare(right, "zh-Hant"));
-            elements.shippingOptionInput.value = "";
-            persistLocalState();
-            renderAll();
-            setStorageStatus("已新增送貨方式", "local");
-            await autoSaveIfPossible();
-            elements.shippingOptionInput.focus();
-        }
-
-        async function deleteShippingOption(option) {
-            const isUsed = state.records.some((record) => record.shipping.includes(option));
-            const confirmed = window.confirm(
-                isUsed
-                    ? `「${option}」已被既有紀錄使用，刪除後會一併從那些紀錄移除。確定刪除嗎？`
-                    : `確定要刪除送貨方式「${option}」嗎？`
-            );
-            if (!confirmed) {
-                return;
-            }
-
-            state.shippingOptions = state.shippingOptions.filter((item) => item !== option);
-            state.records = state.records.map((record) => {
-                const nextShipping = record.shipping.filter((item) => item !== option);
-                if (nextShipping.length === record.shipping.length) {
-                    return record;
-                }
-                return {
-                    ...record,
-                    shipping: nextShipping,
-                    updatedAt: new Date().toISOString()
-                };
-            });
-            sortRecords();
-            persistLocalState();
-            renderAll();
-            setStorageStatus("已刪除送貨方式", "local");
-            await autoSaveIfPossible();
-        }
-
-        function openSettings() {
-            elements.settingsOverlay.dataset.open = "true";
-            elements.shippingOptionInput.focus();
-        }
-
-        function closeSettings() {
-            elements.settingsOverlay.dataset.open = "false";
-            elements.settingsButton.focus();
-        }
-
-        function persistLocalState() {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            storageMode = fileHandle ? "file" : "local";
-        }
-
-        function sortRecords() {
-            state.records.sort((left, right) => new Date(right.updatedAt) - new Date(left.updatedAt));
-        }
-
-        async function manualSave() {
-            if (!supportsFileSystemAccess()) {
-                setStorageStatus("目前瀏覽器不支援直接寫入檔案，請改用匯出 JSON。", "error");
-                return;
-            }
-
+        function loadInitialState() {
             try {
-                if (!fileHandle) {
-                    await saveAsDataFile();
-                    return;
-                }
-                await writeToDataFile(fileHandle);
-                setStorageStatus("已寫入桌面資料檔", "file");
-            } catch (error) {
-                handleFileError(error, "存檔失敗");
-            }
-        }
-
-        async function autoSaveIfPossible() {
-            if (!fileHandle || !supportsFileSystemAccess()) {
-                return;
-            }
-            try {
-                const granted = await verifyFilePermission(fileHandle, true);
-                if (!granted) {
-                    setStorageStatus("已更新瀏覽器暫存，桌面檔案尚未授權寫入。", "warn");
-                    return;
-                }
-                await writeToDataFile(fileHandle);
-                setStorageStatus("已同步寫入桌面資料檔", "file");
-            } catch (error) {
-                handleFileError(error, "自動存檔失敗");
-            }
-        }
-
-        async function openDataFile() {
-            if (!supportsFileSystemAccess()) {
-                setStorageStatus("目前瀏覽器不支援直接開啟檔案，請改用匯入 JSON。", "error");
-                return;
-            }
-
-            try {
-                const [handle] = await window.showOpenFilePicker({
-                    multiple: false,
-                    types: [{ description: "JSON", accept: { "application/json": [".json"] } }]
-                });
-                const granted = await verifyFilePermission(handle, false);
-                if (!granted) {
-                    setStorageStatus("未取得資料檔讀取權限。", "warn");
-                    return;
-                }
-                const data = await readDataFile(handle);
-                applyLoadedState(data);
-                fileHandle = handle;
-                await storeFileHandle(handle);
-                setStorageStatus("已從資料檔載入資料", "file");
-            } catch (error) {
-                if (error?.name === "AbortError") {
-                    return;
-                }
-                handleFileError(error, "開啟資料檔失敗");
-            }
-        }
-
-        async function saveAsDataFile() {
-            if (!supportsFileSystemAccess()) {
-                setStorageStatus("目前瀏覽器不支援直接另存檔案，請改用匯出 JSON。", "error");
-                return;
-            }
-
-            try {
-                const handle = await window.showSaveFilePicker({
-                    suggestedName: "quicknote-data.json",
-                    types: [{ description: "JSON", accept: { "application/json": [".json"] } }]
-                });
-                const granted = await verifyFilePermission(handle, true);
-                if (!granted) {
-                    setStorageStatus("未取得資料檔寫入權限。", "warn");
-                    return;
-                }
-                fileHandle = handle;
-                await storeFileHandle(handle);
-                await writeToDataFile(handle);
-                setStorageStatus("已建立並寫入桌面資料檔", "file");
-            } catch (error) {
-                if (error?.name === "AbortError") {
-                    return;
-                }
-                handleFileError(error, "另存資料檔失敗");
-            }
-        }
-
-        function exportJsonFile() {
-            const blob = new Blob([JSON.stringify(state, null, 2)], { type: "application/json" });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = `quicknote-export-${new Date().toISOString().slice(0, 10)}.json`;
-            document.body.append(link);
-            link.click();
-            link.remove();
-            URL.revokeObjectURL(url);
-            setStorageStatus("已匯出 JSON 檔", fileHandle ? "file" : "local");
-        }
-
-        async function importJsonFile(event) {
-            const file = event.target.files?.[0];
-            if (!file) {
-                return;
-            }
-
-            try {
-                const text = await file.text();
-                const data = JSON.parse(text);
-                applyLoadedState(data);
-                setStorageStatus("已匯入 JSON 檔", fileHandle ? "file" : "local");
-                await autoSaveIfPossible();
+                const cached = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
+                return cached ? normalizeState(JSON.parse(cached)) : createDefaultState();
             } catch {
-                window.alert("匯入失敗，請確認 JSON 格式是否正確。");
-            } finally {
-                event.target.value = "";
+                return createDefaultState();
             }
-        }
-
-        function applyLoadedState(data) {
-            const next = normalizeState(data);
-            state.shippingOptions = next.shippingOptions;
-            state.records = next.records;
-            currentEditId = null;
-            persistLocalState();
-            resetForm();
-            renderAll();
         }
 
         function supportsFileSystemAccess() {
             return typeof window.showOpenFilePicker === "function" && typeof window.showSaveFilePicker === "function";
         }
 
-        async function writeToDataFile(handle) {
+        function formatDateTime(value) {
+            const date = new Date(value);
+            return Number.isNaN(date.getTime()) ? "時間格式錯誤" : new Intl.DateTimeFormat("zh-TW", {
+                year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit"
+            }).format(date);
+        }
+
+        function formatDeliveryDate(value) {
+            if (!value) return "";
+            const date = new Date(`${value}T00:00:00`);
+            return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat("zh-TW", {
+                year: "numeric", month: "2-digit", day: "2-digit"
+            }).format(date);
+        }
+
+        function hasUpdated(record) {
+            return Boolean(record?.updatedAt) && record.updatedAt !== record.createdAt;
+        }
+
+        async function verifyFilePermission(handle, writable) {
+            const options = writable ? { mode: "readwrite" } : {};
+            if (typeof handle.queryPermission === "function" && await handle.queryPermission(options) === "granted") return true;
+            if (typeof handle.requestPermission === "function") return await handle.requestPermission(options) === "granted";
+            return true;
+        }
+
+        async function writeToDataFile(handle, state) {
             const writable = await handle.createWritable();
-            await writable.write(JSON.stringify(state, null, 2));
+            await writable.write(JSON.stringify({ shippingOptions: state.shippingOptions, records: state.records }, null, 2));
             await writable.close();
-            storageMode = "file";
         }
 
         async function readDataFile(handle) {
@@ -1497,129 +861,24 @@
             return text.trim() ? JSON.parse(text) : createDefaultState();
         }
 
-        async function verifyFilePermission(handle, writable) {
-            const options = writable ? { mode: "readwrite" } : {};
-            if (typeof handle.queryPermission === "function") {
-                const current = await handle.queryPermission(options);
-                if (current === "granted") {
-                    return true;
-                }
-            }
-            if (typeof handle.requestPermission === "function") {
-                return (await handle.requestPermission(options)) === "granted";
-            }
-            return true;
-        }
-
-        async function restoreSavedFileHandle() {
-            if (!supportsFileSystemAccess()) {
-                setStorageStatus("目前瀏覽器不支援直接寫入檔案，請使用匯出/匯入 JSON。", "warn");
-                return;
-            }
-
-            try {
-                const savedHandle = await getStoredFileHandle();
-                if (!savedHandle) {
-                    setStorageStatus("目前只存在瀏覽器暫存，建議另存資料檔。", "warn");
-                    return;
-                }
-                const granted = await verifyFilePermission(savedHandle, false);
-                if (!granted) {
-                    setStorageStatus("找到上次的資料檔，但還沒重新授權。", "warn");
-                    return;
-                }
-                const data = await readDataFile(savedHandle);
-                fileHandle = savedHandle;
-                applyLoadedState(data);
-                setStorageStatus("已自動載入上次的資料檔", "file");
-            } catch (error) {
-                handleFileError(error, "自動讀取資料檔失敗");
-            }
-        }
-
-        function setStorageStatus(message, mode) {
-            storageMode = mode;
-            elements.storageStatus.textContent = message;
-            elements.storageStatus.className = "storage-status";
-            if (mode === "warn") {
-                elements.storageStatus.classList.add("warn");
-            } else if (mode === "error") {
-                elements.storageStatus.classList.add("error");
-            }
-        }
-
-        function handleFileError(error, prefix) {
-            console.error(prefix, error);
-            const message = error?.message ? `${prefix}：${error.message}` : prefix;
-            setStorageStatus(message, "error");
-        }
-
-        function formatDateTime(value) {
-            const date = new Date(value);
-            if (Number.isNaN(date.getTime())) {
-                return "時間格式錯誤";
-            }
-            return new Intl.DateTimeFormat("zh-TW", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit",
-                hour: "2-digit",
-                minute: "2-digit"
-            }).format(date);
-        }
-
-        function formatDeliveryDate(value) {
-            if (!value) {
-                return "";
-            }
-            const date = new Date(`${value}T00:00:00`);
-            if (Number.isNaN(date.getTime())) {
-                return value;
-            }
-            return new Intl.DateTimeFormat("zh-TW", {
-                year: "numeric",
-                month: "2-digit",
-                day: "2-digit"
-            }).format(date);
-        }
-
-        function escapeHtml(value) {
-            return String(value)
-                .replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;")
-                .replaceAll('"', "&quot;")
-                .replaceAll("'", "&#39;");
-        }
-
-        function escapeAttribute(value) {
-            return escapeHtml(value);
-        }
-
         function openDb() {
             return new Promise((resolve, reject) => {
                 const request = indexedDB.open(HANDLE_DB_NAME, 1);
-                request.addEventListener("upgradeneeded", () => {
-                    request.result.createObjectStore(HANDLE_STORE_NAME);
-                });
+                request.addEventListener("upgradeneeded", () => request.result.createObjectStore(HANDLE_STORE_NAME));
                 request.addEventListener("success", () => resolve(request.result));
                 request.addEventListener("error", () => reject(request.error));
             });
         }
 
         async function storeFileHandle(handle) {
-            try {
-                const db = await openDb();
-                await new Promise((resolve, reject) => {
-                    const transaction = db.transaction(HANDLE_STORE_NAME, "readwrite");
-                    transaction.objectStore(HANDLE_STORE_NAME).put(handle, HANDLE_KEY);
-                    transaction.addEventListener("complete", resolve);
-                    transaction.addEventListener("error", () => reject(transaction.error));
-                });
-                db.close();
-            } catch {
-                setStorageStatus("已存到本機暫存，但無法記住資料檔連結。", "warn");
-            }
+            const db = await openDb();
+            await new Promise((resolve, reject) => {
+                const transaction = db.transaction(HANDLE_STORE_NAME, "readwrite");
+                transaction.objectStore(HANDLE_STORE_NAME).put(handle, HANDLE_KEY);
+                transaction.addEventListener("complete", resolve);
+                transaction.addEventListener("error", () => reject(transaction.error));
+            });
+            db.close();
         }
 
         async function getStoredFileHandle() {
@@ -1637,6 +896,369 @@
                 return null;
             }
         }
+
+        const app = createApp({
+            setup() {
+                const state = reactive(loadInitialState());
+                const fileHandle = ref(null);
+                const searchQuery = ref("");
+                const showSettings = ref(false);
+                const newShippingOption = ref("");
+                const importInput = ref(null);
+                const editingId = ref(null);
+                const isCreating = ref(false);
+                const statusMessage = ref("");
+                const statusTone = ref("");
+                const editorForm = reactive(createEmptyForm());
+                const editorSnapshot = ref("");
+                const cityOptions = Object.keys(DISTRICTS);
+
+                const districtOptions = computed(() => editorForm.city ? DISTRICTS[editorForm.city] ?? [] : []);
+                const filteredRecords = computed(() => {
+                    const query = searchQuery.value.trim().toLowerCase();
+                    if (!query) return [...state.records];
+                    return state.records.filter((record) => [
+                        record.name,
+                        record.deliveryDate,
+                        formatDeliveryDate(record.deliveryDate),
+                        record.item,
+                        `${record.city}${record.district}`,
+                        `${record.city} ${record.district}`,
+                        record.shipping.join(" "),
+                        record.note
+                    ].join("\n").toLowerCase().includes(query));
+                });
+                const resultsMeta = computed(() => {
+                    if (!state.records.length) return "尚未建立任何紀錄";
+                    if (!filteredRecords.value.length) return `搜尋不到符合條件的資料，目前總共有 ${state.records.length} 筆紀錄`;
+                    return `共顯示 ${filteredRecords.value.length} / ${state.records.length} 筆紀錄`;
+                });
+
+                watch(() => editorForm.city, (city) => {
+                    if (!city || !(DISTRICTS[city] ?? []).includes(editorForm.district)) editorForm.district = "";
+                });
+
+                function createEmptyForm() {
+                    return { name: "", deliveryDate: "", item: "", city: "", district: "", shipping: [], note: "" };
+                }
+
+                function setStatus(message, tone = "") {
+                    statusMessage.value = message;
+                    statusTone.value = tone;
+                }
+
+                function formSnapshot() {
+                    return JSON.stringify({ ...editorForm, shipping: [...editorForm.shipping].sort() });
+                }
+
+                function fillEditor(record = null) {
+                    Object.assign(editorForm, createEmptyForm(), record ? {
+                        name: record.name,
+                        deliveryDate: record.deliveryDate,
+                        item: record.item,
+                        city: record.city,
+                        district: record.district,
+                        shipping: [...record.shipping],
+                        note: record.note
+                    } : {});
+                    editorSnapshot.value = formSnapshot();
+                }
+
+                function discardEditor(force = false) {
+                    if (!force && (isCreating.value || editingId.value) && formSnapshot() !== editorSnapshot.value) {
+                        if (!confirm("目前有尚未儲存的內容，確定要放棄嗎？")) return false;
+                    }
+                    isCreating.value = false;
+                    editingId.value = null;
+                    fillEditor(null);
+                    editorSnapshot.value = "";
+                    return true;
+                }
+
+                function focusEditor() {
+                    nextTick(() => document.querySelector("[data-editor-autofocus]")?.focus());
+                }
+
+                function startCreate() {
+                    if (!discardEditor()) return;
+                    fillEditor(null);
+                    isCreating.value = true;
+                    focusEditor();
+                }
+
+                function startEdit(record) {
+                    if (!discardEditor()) return;
+                    fillEditor(record);
+                    editingId.value = record.id;
+                    focusEditor();
+                }
+
+                function cancelEditor() {
+                    discardEditor();
+                }
+
+                function validateEditor() {
+                    if (!editorForm.name.trim()) return alert("請先填寫客戶名。"), false;
+                    return true;
+                }
+
+                function sortRecords() {
+                    state.records.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
+                }
+
+                function persistLocalState() {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify({ shippingOptions: state.shippingOptions, records: state.records }));
+                }
+
+                async function persistAfterChange(message) {
+                    persistLocalState();
+                    if (!fileHandle.value || !supportsFileSystemAccess()) {
+                        setStatus(`${message}，已存在瀏覽器暫存。`, "warn");
+                        return;
+                    }
+                    try {
+                        const granted = await verifyFilePermission(fileHandle.value, true);
+                        if (!granted) return setStatus(`${message}，桌面檔案尚未授權寫入。`, "warn");
+                        await writeToDataFile(fileHandle.value, state);
+                        setStatus(`${message}，已寫入資料檔。`);
+                    } catch (error) {
+                        console.error(error);
+                        setStatus(`${message}，但寫入資料檔失敗。`, "error");
+                    }
+                }
+
+                async function submitEditor() {
+                    if (!validateEditor()) return;
+                    const now = new Date().toISOString();
+                    const payload = {
+                        name: editorForm.name.trim(),
+                        deliveryDate: editorForm.deliveryDate,
+                        item: editorForm.item.trim(),
+                        city: editorForm.city,
+                        district: editorForm.district,
+                        shipping: uniqueTrimmedList(editorForm.shipping),
+                        note: editorForm.note.trim()
+                    };
+                    if (editingId.value) {
+                        const index = state.records.findIndex((record) => record.id === editingId.value);
+                        if (index !== -1) state.records[index] = { ...state.records[index], ...payload, updatedAt: now };
+                        sortRecords();
+                        discardEditor(true);
+                        await persistAfterChange("已更新紀錄");
+                        return;
+                    }
+                    state.records.unshift({ id: createId(), ...payload, createdAt: now, updatedAt: now });
+                    sortRecords();
+                    discardEditor(true);
+                    await persistAfterChange("已新增紀錄");
+                }
+
+                async function deleteRecord(id) {
+                    const record = state.records.find((item) => item.id === id);
+                    if (!record || !confirm(`確定要刪除「${record.name}」這筆紀錄嗎？`)) return;
+                    state.records = state.records.filter((item) => item.id !== id);
+                    if (editingId.value === id) discardEditor(true);
+                    await persistAfterChange("已刪除紀錄");
+                }
+
+                async function clearAllRecords() {
+                    if (!state.records.length || !confirm("確定要清空全部紀錄嗎？")) return;
+                    state.records = [];
+                    discardEditor(true);
+                    closeSettings();
+                    await persistAfterChange("已清空全部紀錄");
+                }
+
+                function clearSearch() {
+                    searchQuery.value = "";
+                }
+
+                function openSettings() {
+                    showSettings.value = true;
+                }
+
+                function closeSettings() {
+                    showSettings.value = false;
+                }
+
+                async function addShippingOption() {
+                    const value = newShippingOption.value.trim();
+                    if (!value) return;
+                    if (state.shippingOptions.includes(value)) return alert("這個送貨方式已經存在。");
+                    state.shippingOptions.push(value);
+                    state.shippingOptions.sort((a, b) => a.localeCompare(b, "zh-Hant"));
+                    newShippingOption.value = "";
+                    await persistAfterChange("已新增送貨方式");
+                }
+
+                async function renameShippingOption(option) {
+                    const value = prompt("修改送貨方式名稱", option)?.trim();
+                    if (!value || value === option) return;
+                    if (state.shippingOptions.includes(value)) return alert("這個送貨方式已經存在。");
+                    state.shippingOptions = state.shippingOptions.map((item) => item === option ? value : item).sort((a, b) => a.localeCompare(b, "zh-Hant"));
+                    state.records = state.records.map((record) => record.shipping.includes(option)
+                        ? { ...record, shipping: record.shipping.map((item) => item === option ? value : item), updatedAt: new Date().toISOString() }
+                        : record);
+                    editorForm.shipping = editorForm.shipping.map((item) => item === option ? value : item);
+                    sortRecords();
+                    await persistAfterChange("已修改送貨方式");
+                }
+
+                async function deleteShippingOption(option) {
+                    const isUsed = state.records.some((record) => record.shipping.includes(option));
+                    const message = isUsed ? `「${option}」已被既有紀錄使用，刪除後會一併移除。確定刪除嗎？` : `確定要刪除「${option}」嗎？`;
+                    if (!confirm(message)) return;
+                    state.shippingOptions = state.shippingOptions.filter((item) => item !== option);
+                    state.records = state.records.map((record) => record.shipping.includes(option)
+                        ? { ...record, shipping: record.shipping.filter((item) => item !== option), updatedAt: new Date().toISOString() }
+                        : record);
+                    editorForm.shipping = editorForm.shipping.filter((item) => item !== option);
+                    sortRecords();
+                    await persistAfterChange("已刪除送貨方式");
+                }
+
+                async function manualSave() {
+                    if (!supportsFileSystemAccess()) return exportJsonFile();
+                    if (!fileHandle.value) return saveAsDataFile();
+                    await writeToDataFile(fileHandle.value, state);
+                    setStatus("已寫入資料檔。");
+                }
+
+                async function openDataFile() {
+                    if (!supportsFileSystemAccess()) return openImportDialog();
+                    if (!discardEditor()) return;
+                    try {
+                        const [handle] = await window.showOpenFilePicker({ multiple: false, types: [{ description: "JSON", accept: { "application/json": [".json"] } }] });
+                        if (!await verifyFilePermission(handle, false)) return setStatus("未取得資料檔讀取權限。", "warn");
+                        const next = normalizeState(await readDataFile(handle));
+                        state.shippingOptions = next.shippingOptions;
+                        state.records = next.records;
+                        fileHandle.value = handle;
+                        await storeFileHandle(handle);
+                        persistLocalState();
+                        setStatus("已從資料檔載入資料。");
+                    } catch (error) {
+                        if (error?.name !== "AbortError") setStatus("開啟資料檔失敗。", "error");
+                    }
+                }
+
+                async function saveAsDataFile() {
+                    if (!supportsFileSystemAccess()) return exportJsonFile();
+                    try {
+                        const handle = await window.showSaveFilePicker({ suggestedName: "quicknote-data.json", types: [{ description: "JSON", accept: { "application/json": [".json"] } }] });
+                        if (!await verifyFilePermission(handle, true)) return setStatus("未取得資料檔寫入權限。", "warn");
+                        fileHandle.value = handle;
+                        await storeFileHandle(handle);
+                        await writeToDataFile(handle, state);
+                        setStatus("已建立並寫入資料檔。");
+                    } catch (error) {
+                        if (error?.name !== "AbortError") setStatus("另存資料檔失敗。", "error");
+                    }
+                }
+
+                function exportJsonFile() {
+                    const blob = new Blob([JSON.stringify({ shippingOptions: state.shippingOptions, records: state.records }, null, 2)], { type: "application/json" });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement("a");
+                    link.href = url;
+                    link.download = `quicknote-export-${new Date().toISOString().slice(0, 10)}.json`;
+                    document.body.append(link);
+                    link.click();
+                    link.remove();
+                    URL.revokeObjectURL(url);
+                    setStatus("已匯出 JSON。");
+                }
+
+                function openImportDialog() {
+                    importInput.value?.click();
+                }
+
+                async function importJsonFile(event) {
+                    const file = event.target.files?.[0];
+                    if (!file || !discardEditor()) return;
+                    try {
+                        const next = normalizeState(JSON.parse(await file.text()));
+                        state.shippingOptions = next.shippingOptions;
+                        state.records = next.records;
+                        persistLocalState();
+                        await persistAfterChange("已匯入 JSON");
+                    } catch {
+                        alert("匯入失敗，請確認 JSON 格式是否正確。");
+                    } finally {
+                        event.target.value = "";
+                    }
+                }
+
+                nextTick(async () => {
+                    if (!supportsFileSystemAccess()) return;
+                    const handle = await getStoredFileHandle();
+                    if (!handle || !await verifyFilePermission(handle, false)) return;
+                    try {
+                        const next = normalizeState(await readDataFile(handle));
+                        state.shippingOptions = next.shippingOptions;
+                        state.records = next.records;
+                        fileHandle.value = handle;
+                        persistLocalState();
+                    } catch {
+                        setStatus("自動讀取上次資料檔失敗。", "warn");
+                    }
+                });
+
+                return {
+                    state,
+                    searchQuery,
+                    showSettings,
+                    newShippingOption,
+                    importInput,
+                    editingId,
+                    isCreating,
+                    statusMessage,
+                    statusTone,
+                    editorForm,
+                    cityOptions,
+                    districtOptions,
+                    filteredRecords,
+                    resultsMeta,
+                    startCreate,
+                    startEdit,
+                    cancelEditor,
+                    submitEditor,
+                    deleteRecord,
+                    clearAllRecords,
+                    clearSearch,
+                    openSettings,
+                    closeSettings,
+                    addShippingOption,
+                    renameShippingOption,
+                    deleteShippingOption,
+                    manualSave,
+                    openDataFile,
+                    saveAsDataFile,
+                    exportJsonFile,
+                    openImportDialog,
+                    importJsonFile,
+                    formatDateTime,
+                    formatDeliveryDate,
+                    hasUpdated
+                };
+            }
+        });
+
+        app.component("record-editor", {
+            template: "#record-editor-template",
+            props: {
+                form: { type: Object, required: true },
+                cityOptions: { type: Array, required: true },
+                districtOptions: { type: Array, required: true },
+                shippingOptions: { type: Array, required: true },
+                mode: { type: String, required: true }
+            },
+            emits: ["save", "cancel", "delete"]
+        });
+
+        app.use(VCalendar.default, { componentPrefix: "V" });
+
+        app.mount("#app");
     </script>
 </body>
 </html>
