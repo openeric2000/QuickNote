@@ -66,6 +66,11 @@
             margin: 0 auto;
             display: grid;
             gap: var(--space-3);
+            transition: padding-top 180ms ease;
+        }
+
+        .shell.has-top-message {
+            padding-top: 7.25rem;
         }
 
         .panel {
@@ -76,6 +81,95 @@
             padding: clamp(1rem, 2.4vw, 1.55rem);
             display: grid;
             gap: var(--space-4);
+        }
+
+        .top-message-stack {
+            position: fixed;
+            top: clamp(0.75rem, 2vw, 1.5rem);
+            left: 50%;
+            z-index: 50;
+            width: min(520px, calc(100% - 1.5rem));
+            display: grid;
+            gap: var(--space-2);
+            transform: translateX(-50%);
+        }
+
+        .top-confirm, .top-notice {
+            border: 1px solid rgba(92, 70, 55, 0.16);
+            border-radius: var(--radius-lg);
+            background: rgba(255, 253, 249, 0.98);
+            box-shadow: 0 14px 34px rgba(86, 56, 34, 0.14);
+            padding: 1.25rem 1.35rem;
+        }
+
+        .top-confirm {
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-3);
+        }
+
+        .top-confirm::before {
+            content: "";
+            position: absolute;
+            inset: 0 auto 0 0;
+            width: 0.45rem;
+            background: var(--primary);
+        }
+
+        .top-confirm.danger {
+            border-color: rgba(167, 53, 53, 0.36);
+            background: rgba(255, 253, 249, 0.98);
+            box-shadow: 0 16px 38px rgba(86, 56, 34, 0.16), 0 0 0 1px rgba(167, 53, 53, 0.06);
+        }
+
+        .top-confirm.danger::before {
+            background: var(--danger);
+        }
+
+        .top-confirm.danger .top-message-content strong {
+            color: var(--danger);
+        }
+
+        .top-confirm.danger .top-message-content p {
+            color: var(--text);
+        }
+
+        .top-confirm.danger .danger-button {
+            color: #fff;
+            background: linear-gradient(135deg, #b83232, var(--danger));
+            box-shadow: 0 10px 20px rgba(167, 53, 53, 0.22);
+        }
+
+        .top-notice.warn {
+            border-color: rgba(162, 77, 36, 0.28);
+        }
+
+        .top-notice.error {
+            border-color: rgba(167, 53, 53, 0.28);
+        }
+
+        .top-message-content {
+            display: grid;
+            gap: 0.45rem;
+        }
+
+        .top-message-content strong {
+            font-size: 1rem;
+        }
+
+        .top-message-content p {
+            color: var(--text-soft);
+            line-height: 1.6;
+        }
+
+        .top-confirm-actions {
+            display: flex;
+            align-items: center;
+            gap: var(--space-2);
+            flex-wrap: wrap;
         }
 
         .panel-header {
@@ -125,6 +219,12 @@
             font-weight: 700;
             color: var(--text);
             transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
+        }
+
+        .button:disabled, .ghost-button:disabled, .danger-button:disabled, .icon-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.52;
+            transform: none;
         }
 
         .button {
@@ -280,6 +380,25 @@
             background: linear-gradient(180deg, rgba(250, 255, 253, 0.96), rgba(244, 252, 249, 0.94));
         }
 
+        .record-card.selected {
+            border-color: rgba(47, 118, 111, 0.42);
+            box-shadow: 0 18px 36px rgba(47, 118, 111, 0.12);
+        }
+
+        .record-card.selectable {
+            cursor: pointer;
+        }
+
+        .record-card.selectable:hover {
+            border-color: rgba(47, 118, 111, 0.34);
+            transform: translateY(-1px);
+        }
+
+        .record-card.selectable:focus-visible {
+            outline: 3px solid rgba(47, 118, 111, 0.28);
+            outline-offset: 3px;
+        }
+
         .record-top {
             display: flex;
             align-items: flex-start;
@@ -291,6 +410,32 @@
         .record-title {
             display: grid;
             gap: 0.35rem;
+        }
+
+        .record-select-label {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.55rem;
+            color: var(--secondary);
+            font-weight: 800;
+        }
+
+        .record-select-label input {
+            width: 1.1rem;
+            height: 1.1rem;
+            accent-color: var(--secondary);
+        }
+
+        .selection-count {
+            min-height: 44px;
+            display: inline-flex;
+            align-items: center;
+            border-radius: 999px;
+            padding: 0.72rem 1rem;
+            color: var(--secondary);
+            background: var(--secondary-soft);
+            font-weight: 800;
         }
 
         .record-item, .record-note {
@@ -355,6 +500,18 @@
         }
 
         .field label, .field legend {
+            font-weight: 700;
+        }
+
+        .field.invalid input {
+            border-color: rgba(167, 53, 53, 0.7);
+            background: #fff5f3;
+            box-shadow: 0 0 0 4px rgba(167, 53, 53, 0.1);
+        }
+
+        .field-error {
+            color: var(--danger);
+            font-size: 0.9rem;
             font-weight: 700;
         }
 
@@ -480,12 +637,17 @@
                 align-items: stretch;
             }
 
+            .top-confirm {
+                align-items: stretch;
+                flex-direction: column;
+            }
+
             .toolbar-group, .toolbar-side, .record-actions, .settings-item-actions {
                 width: 100%;
             }
 
             .toolbar-group button, .toolbar-side button, .record-actions button, .settings-actions button,
-            .inline-form button, .settings-item-actions button {
+            .inline-form button, .settings-item-actions button, .top-confirm-actions button {
                 width: 100%;
             }
 
@@ -505,7 +667,25 @@
 </head>
 <body>
     <div id="app" v-cloak>
-        <main class="shell">
+        <div class="top-message-stack" aria-live="polite">
+            <section v-if="topConfirm.visible" class="top-confirm" :class="topConfirm.tone" role="dialog" aria-labelledby="topConfirmTitle">
+                <div class="top-message-content">
+                    <strong id="topConfirmTitle">{{ topConfirm.title }}</strong>
+                    <p>{{ topConfirm.message }}</p>
+                </div>
+                <div class="top-confirm-actions">
+                    <button class="danger-button" type="button" data-top-confirm-button @click="resolveTopConfirm(true)">{{ topConfirm.confirmText }}</button>
+                    <button class="ghost-button" type="button" @click="resolveTopConfirm(false)">{{ topConfirm.cancelText }}</button>
+                </div>
+            </section>
+            <section v-if="topNotice.visible" class="top-notice" :class="topNotice.tone" role="status">
+                <div class="top-message-content">
+                    <strong>{{ topNotice.title }}</strong>
+                    <p>{{ topNotice.message }}</p>
+                </div>
+            </section>
+        </div>
+        <main class="shell" :class="{ 'has-top-message': topConfirm.visible || topNotice.visible }">
             <section class="panel" aria-labelledby="recordsTitle">
                 <div class="panel-header">
                     <div>
@@ -516,8 +696,17 @@
 
                 <div class="toolbar">
                     <div class="toolbar-group">
-                        <button class="button" type="button" @click="startCreate">新增紀錄</button>
-                        <button class="ghost-button" type="button" @click="clearSearch">清除搜尋</button>
+                        <template v-if="selectionMode">
+                            <span class="selection-count">已選 {{ selectedRecordIds.length }} 筆</span>
+                            <button class="ghost-button" type="button" @click="toggleSelectAllVisible" :disabled="!filteredRecords.length">{{ allVisibleSelected ? '取消全選' : '全選目前列表' }}</button>
+                            <button class="danger-button" type="button" @click="deleteSelectedRecords" :disabled="!selectedRecordIds.length">刪除選取</button>
+                            <button class="ghost-button" type="button" @click="cancelSelectionMode">取消</button>
+                        </template>
+                        <template v-else>
+                            <button class="button" type="button" @click="startCreate">新增紀錄</button>
+                            <button class="ghost-button" type="button" @click="clearSearch">清除搜尋</button>
+                            <button class="danger-button" type="button" @click="startSelectionMode" :disabled="!state.records.length">多選刪除</button>
+                        </template>
                     </div>
                     <div class="toolbar-side">
                         <button class="icon-button" type="button" aria-label="設定" @click="openSettings">
@@ -536,6 +725,7 @@
                     <article v-if="isCreating" class="record-card editing">
                         <record-editor
                             :form="editorForm"
+                            :errors="editorErrors"
                             :city-options="cityOptions"
                             :district-options="districtOptions"
                             :shipping-options="state.shippingOptions"
@@ -545,10 +735,22 @@
                         ></record-editor>
                     </article>
 
-                    <article v-for="record in filteredRecords" :key="record.id" class="record-card" :class="{ editing: editingId === record.id }">
+                    <article
+                        v-for="record in filteredRecords"
+                        :key="record.id"
+                        class="record-card"
+                        :class="{ editing: editingId === record.id, selected: isRecordSelected(record.id), selectable: selectionMode }"
+                        :role="selectionMode ? 'checkbox' : null"
+                        :aria-checked="selectionMode ? isRecordSelected(record.id) : null"
+                        :tabindex="selectionMode ? 0 : null"
+                        @click="toggleRecordSelectionFromCard(record.id)"
+                        @keydown.enter.prevent="toggleRecordSelectionFromCard(record.id)"
+                        @keydown.space.prevent="toggleRecordSelectionFromCard(record.id)"
+                    >
                         <record-editor
                             v-if="editingId === record.id"
                             :form="editorForm"
+                            :errors="editorErrors"
                             :city-options="cityOptions"
                             :district-options="districtOptions"
                             :shipping-options="state.shippingOptions"
@@ -560,11 +762,15 @@
 
                         <template v-else>
                             <div class="record-top">
+                                <div v-if="selectionMode" class="record-select-label">
+                                    <input type="checkbox" :checked="isRecordSelected(record.id)" tabindex="-1" @click.prevent>
+                                    <span>選取</span>
+                                </div>
                                 <div class="record-title">
                                     <h3>{{ record.name }}</h3>
                                     <small>{{ record.city }}{{ record.district }}</small>
                                 </div>
-                                <div class="record-actions">
+                                <div v-if="!selectionMode" class="record-actions">
                                     <button class="ghost-button" type="button" @click="startEdit(record)">編輯</button>
                                     <button class="danger-button" type="button" @click="deleteRecord(record.id)">刪除</button>
                                 </div>
@@ -652,7 +858,7 @@
     </div>
 
     <template id="record-editor-template">
-        <form class="editor-form" @submit.prevent="$emit('save')">
+        <form class="editor-form" novalidate @submit.prevent="$emit('save')">
             <div class="record-top">
                 <div class="record-title">
                     <h3>{{ mode === 'create' ? '新增紀錄' : '編輯紀錄' }}</h3>
@@ -666,9 +872,10 @@
             </div>
 
             <div class="form-grid two">
-                <div class="field">
+                <div class="field" :class="{ invalid: errors.name }">
                     <label>客戶名<span class="required-mark" aria-hidden="true">*</span></label>
-                    <input data-editor-autofocus v-model.trim="form.name" autocomplete="off" placeholder="例如：王小姐" required aria-required="true">
+                    <input data-editor-autofocus v-model.trim="form.name" autocomplete="off" placeholder="例如：王小姐" aria-required="true" :aria-invalid="errors.name ? 'true' : 'false'" :aria-describedby="errors.name ? 'customerNameError' : null">
+                    <p v-if="errors.name" id="customerNameError" class="field-error">必填</p>
                 </div>
                 <div class="field">
                     <label>出貨日期</label>
@@ -924,11 +1131,18 @@
                 const importInput = ref(null);
                 const editingId = ref(null);
                 const isCreating = ref(false);
+                const selectionMode = ref(false);
+                const selectedRecordIds = ref([]);
                 const statusMessage = ref("");
                 const statusTone = ref("");
+                const topConfirm = reactive({ visible: false, title: "", message: "", confirmText: "確認", cancelText: "取消", tone: "danger" });
+                const topNotice = reactive({ visible: false, title: "提醒", message: "", tone: "warn" });
                 const editorForm = reactive(createEmptyForm());
+                const editorErrors = reactive({ name: false });
                 const editorSnapshot = ref("");
                 const cityOptions = Object.keys(DISTRICTS);
+                let confirmResolver = null;
+                let noticeTimer = 0;
 
                 const districtOptions = computed(() => editorForm.city ? DISTRICTS[editorForm.city] ?? [] : []);
                 const filteredRecords = computed(() => {
@@ -950,9 +1164,14 @@
                     if (!filteredRecords.value.length) return `搜尋不到符合條件的資料，目前總共有 ${state.records.length} 筆紀錄`;
                     return `共顯示 ${filteredRecords.value.length} / ${state.records.length} 筆紀錄`;
                 });
+                const allVisibleSelected = computed(() => Boolean(filteredRecords.value.length) && filteredRecords.value.every((record) => selectedRecordIds.value.includes(record.id)));
 
                 watch(() => editorForm.city, (city) => {
                     if (!city || !(DISTRICTS[city] ?? []).includes(editorForm.district)) editorForm.district = "";
+                });
+
+                watch(() => editorForm.name, (name) => {
+                    if (name.trim()) editorErrors.name = false;
                 });
 
                 function createEmptyForm() {
@@ -964,11 +1183,49 @@
                     statusTone.value = tone;
                 }
 
+                function resetEditorErrors() {
+                    editorErrors.name = false;
+                }
+
+                function showTopNotice(message, tone = "warn", title = "提醒") {
+                    window.clearTimeout(noticeTimer);
+                    topNotice.title = title;
+                    topNotice.message = message;
+                    topNotice.tone = tone;
+                    topNotice.visible = true;
+                    noticeTimer = window.setTimeout(() => {
+                        topNotice.visible = false;
+                    }, 3200);
+                }
+
+                function requestTopConfirm({ title = "請確認", message, confirmText = "確認", cancelText = "取消", tone = "danger" }) {
+                    if (confirmResolver) confirmResolver(false);
+                    topConfirm.title = title;
+                    topConfirm.message = message;
+                    topConfirm.confirmText = confirmText;
+                    topConfirm.cancelText = cancelText;
+                    topConfirm.tone = tone;
+                    topConfirm.visible = true;
+                    nextTick(() => document.querySelector("[data-top-confirm-button]")?.focus());
+                    return new Promise((resolve) => {
+                        confirmResolver = resolve;
+                    });
+                }
+
+                function resolveTopConfirm(accepted) {
+                    if (!topConfirm.visible) return;
+                    topConfirm.visible = false;
+                    const resolver = confirmResolver;
+                    confirmResolver = null;
+                    resolver?.(accepted);
+                }
+
                 function formSnapshot() {
                     return JSON.stringify({ ...editorForm, shipping: [...editorForm.shipping].sort() });
                 }
 
                 function fillEditor(record = null) {
+                    resetEditorErrors();
                     Object.assign(editorForm, createEmptyForm(), record ? {
                         name: record.name,
                         deliveryDate: record.deliveryDate,
@@ -981,9 +1238,15 @@
                     editorSnapshot.value = formSnapshot();
                 }
 
-                function discardEditor(force = false) {
+                async function discardEditor(force = false) {
                     if (!force && (isCreating.value || editingId.value) && formSnapshot() !== editorSnapshot.value) {
-                        if (!confirm("目前有尚未儲存的內容，確定要放棄嗎？")) return false;
+                        const accepted = await requestTopConfirm({
+                            title: "放棄未儲存內容？",
+                            message: "目前有尚未儲存的內容，確定要放棄嗎？",
+                            confirmText: "放棄",
+                            tone: "danger"
+                        });
+                        if (!accepted) return false;
                     }
                     isCreating.value = false;
                     editingId.value = null;
@@ -996,26 +1259,33 @@
                     nextTick(() => document.querySelector("[data-editor-autofocus]")?.focus());
                 }
 
-                function startCreate() {
-                    if (!discardEditor()) return;
+                async function startCreate() {
+                    if (!await discardEditor()) return;
+                    cancelSelectionMode();
                     fillEditor(null);
                     isCreating.value = true;
                     focusEditor();
                 }
 
-                function startEdit(record) {
-                    if (!discardEditor()) return;
+                async function startEdit(record) {
+                    if (!await discardEditor()) return;
+                    cancelSelectionMode();
                     fillEditor(record);
                     editingId.value = record.id;
                     focusEditor();
                 }
 
-                function cancelEditor() {
-                    discardEditor();
+                async function cancelEditor() {
+                    await discardEditor();
                 }
 
                 function validateEditor() {
-                    if (!editorForm.name.trim()) return alert("請先填寫客戶名。"), false;
+                    if (!editorForm.name.trim()) {
+                        editorErrors.name = true;
+                        focusEditor();
+                        return false;
+                    }
+                    resetEditorErrors();
                     return true;
                 }
 
@@ -1072,16 +1342,86 @@
 
                 async function deleteRecord(id) {
                     const record = state.records.find((item) => item.id === id);
-                    if (!record || !confirm(`確定要刪除「${record.name}」這筆紀錄嗎？`)) return;
+                    if (!record) return;
+                    const accepted = await requestTopConfirm({
+                        title: "刪除這筆紀錄？",
+                        message: `確定要刪除「${record.name}」這筆紀錄嗎？`,
+                        confirmText: "刪除",
+                        tone: "danger"
+                    });
+                    if (!accepted) return;
                     state.records = state.records.filter((item) => item.id !== id);
-                    if (editingId.value === id) discardEditor(true);
+                    selectedRecordIds.value = selectedRecordIds.value.filter((recordId) => recordId !== id);
+                    if (editingId.value === id) await discardEditor(true);
                     await persistAfterChange("已刪除紀錄");
                 }
 
+                async function startSelectionMode() {
+                    if (!state.records.length || !await discardEditor()) return;
+                    isCreating.value = false;
+                    selectedRecordIds.value = [];
+                    selectionMode.value = true;
+                }
+
+                function cancelSelectionMode() {
+                    selectionMode.value = false;
+                    selectedRecordIds.value = [];
+                }
+
+                function isRecordSelected(id) {
+                    return selectedRecordIds.value.includes(id);
+                }
+
+                function toggleRecordSelection(id) {
+                    selectedRecordIds.value = isRecordSelected(id)
+                        ? selectedRecordIds.value.filter((recordId) => recordId !== id)
+                        : [...selectedRecordIds.value, id];
+                }
+
+                function toggleRecordSelectionFromCard(id) {
+                    if (!selectionMode.value) return;
+                    toggleRecordSelection(id);
+                }
+
+                function toggleSelectAllVisible() {
+                    const visibleIds = filteredRecords.value.map((record) => record.id);
+                    if (!visibleIds.length) return;
+                    if (allVisibleSelected.value) {
+                        selectedRecordIds.value = selectedRecordIds.value.filter((id) => !visibleIds.includes(id));
+                        return;
+                    }
+                    selectedRecordIds.value = [...new Set([...selectedRecordIds.value, ...visibleIds])];
+                }
+
+                async function deleteSelectedRecords() {
+                    const selectedIds = [...selectedRecordIds.value];
+                    if (!selectedIds.length) return;
+                    const accepted = await requestTopConfirm({
+                        title: "刪除選取紀錄？",
+                        message: `確定要刪除已選取的 ${selectedIds.length} 筆紀錄嗎？`,
+                        confirmText: "刪除選取",
+                        tone: "danger"
+                    });
+                    if (!accepted) return;
+                    const selectedSet = new Set(selectedIds);
+                    state.records = state.records.filter((record) => !selectedSet.has(record.id));
+                    if (selectedSet.has(editingId.value)) await discardEditor(true);
+                    cancelSelectionMode();
+                    await persistAfterChange(`已刪除 ${selectedIds.length} 筆紀錄`);
+                }
+
                 async function clearAllRecords() {
-                    if (!state.records.length || !confirm("確定要清空全部紀錄嗎？")) return;
+                    if (!state.records.length) return;
+                    const accepted = await requestTopConfirm({
+                        title: "清空全部紀錄？",
+                        message: "確定要清空全部紀錄嗎？",
+                        confirmText: "清空全部",
+                        tone: "danger"
+                    });
+                    if (!accepted) return;
                     state.records = [];
-                    discardEditor(true);
+                    await discardEditor(true);
+                    cancelSelectionMode();
                     closeSettings();
                     await persistAfterChange("已清空全部紀錄");
                 }
@@ -1101,7 +1441,7 @@
                 async function addShippingOption() {
                     const value = newShippingOption.value.trim();
                     if (!value) return;
-                    if (state.shippingOptions.includes(value)) return alert("這個送貨方式已經存在。");
+                    if (state.shippingOptions.includes(value)) return showTopNotice("這個送貨方式已經存在。", "warn");
                     state.shippingOptions.push(value);
                     state.shippingOptions.sort((a, b) => a.localeCompare(b, "zh-Hant"));
                     newShippingOption.value = "";
@@ -1121,9 +1461,9 @@
 
                 async function saveShippingOptionRename(option) {
                     const value = shippingOptionDraft.value.trim();
-                    if (!value) return alert("請先填寫送貨方式名稱。");
+                    if (!value) return showTopNotice("請先填寫送貨方式名稱。", "warn");
                     if (value === option) return cancelShippingOptionRename();
-                    if (state.shippingOptions.includes(value)) return alert("這個送貨方式已經存在。");
+                    if (state.shippingOptions.includes(value)) return showTopNotice("這個送貨方式已經存在。", "warn");
                     state.shippingOptions = state.shippingOptions.map((item) => item === option ? value : item).sort((a, b) => a.localeCompare(b, "zh-Hant"));
                     state.records = state.records.map((record) => record.shipping.includes(option)
                         ? { ...record, shipping: record.shipping.map((item) => item === option ? value : item), updatedAt: new Date().toISOString() }
@@ -1137,7 +1477,13 @@
                 async function deleteShippingOption(option) {
                     const isUsed = state.records.some((record) => record.shipping.includes(option));
                     const message = isUsed ? `「${option}」已被既有紀錄使用，刪除後會一併移除。確定刪除嗎？` : `確定要刪除「${option}」嗎？`;
-                    if (!confirm(message)) return;
+                    const accepted = await requestTopConfirm({
+                        title: "刪除送貨方式？",
+                        message,
+                        confirmText: "刪除",
+                        tone: "danger"
+                    });
+                    if (!accepted) return;
                     state.shippingOptions = state.shippingOptions.filter((item) => item !== option);
                     state.records = state.records.map((record) => record.shipping.includes(option)
                         ? { ...record, shipping: record.shipping.filter((item) => item !== option), updatedAt: new Date().toISOString() }
@@ -1156,8 +1502,8 @@
                 }
 
                 async function openDataFile() {
-                    if (!supportsFileSystemAccess()) return alert("目前瀏覽器不支援直接開啟 JSON，請改用下載副本備份資料。");
-                    if (!discardEditor()) return;
+                    if (!supportsFileSystemAccess()) return showTopNotice("目前瀏覽器不支援直接開啟 JSON，請改用下載副本備份資料。", "warn");
+                    if (!await discardEditor()) return;
                     try {
                         const [handle] = await window.showOpenFilePicker({ multiple: false, types: [{ description: "JSON", accept: { "application/json": [".json"] } }] });
                         if (!await verifyFilePermission(handle, false)) return setStatus("未取得 JSON 讀取權限。", "warn");
@@ -1206,7 +1552,7 @@
 
                 async function importJsonFile(event) {
                     const file = event.target.files?.[0];
-                    if (!file || !discardEditor()) return;
+                    if (!file || !await discardEditor()) return;
                     try {
                         const next = normalizeState(JSON.parse(await file.text()));
                         state.shippingOptions = next.shippingOptions;
@@ -1214,7 +1560,7 @@
                         persistLocalState();
                         await persistAfterChange("已匯入 JSON");
                     } catch {
-                        alert("匯入失敗，請確認 JSON 格式是否正確。");
+                        showTopNotice("匯入失敗，請確認 JSON 格式是否正確。", "error", "匯入失敗");
                     } finally {
                         event.target.value = "";
                     }
@@ -1245,18 +1591,32 @@
                     importInput,
                     editingId,
                     isCreating,
+                    selectionMode,
+                    selectedRecordIds,
                     statusMessage,
                     statusTone,
+                    topConfirm,
+                    topNotice,
                     editorForm,
+                    editorErrors,
                     cityOptions,
                     districtOptions,
                     filteredRecords,
                     resultsMeta,
+                    allVisibleSelected,
                     startCreate,
                     startEdit,
                     cancelEditor,
                     submitEditor,
                     deleteRecord,
+                    startSelectionMode,
+                    cancelSelectionMode,
+                    isRecordSelected,
+                    toggleRecordSelection,
+                    toggleRecordSelectionFromCard,
+                    toggleSelectAllVisible,
+                    deleteSelectedRecords,
+                    resolveTopConfirm,
                     clearAllRecords,
                     clearSearch,
                     openSettings,
@@ -1283,6 +1643,7 @@
             template: "#record-editor-template",
             props: {
                 form: { type: Object, required: true },
+                errors: { type: Object, required: true },
                 cityOptions: { type: Array, required: true },
                 districtOptions: { type: Array, required: true },
                 shippingOptions: { type: Array, required: true },
