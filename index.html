@@ -109,8 +109,17 @@
 				transform: translateX(-50%);
 			}
 
+			.side-notice-stack {
+				position: fixed;
+				top: clamp(5.5rem, 12vh, 7rem);
+				left: clamp(0.75rem, 2vw, 1.5rem);
+				z-index: 45;
+				width: min(320px, calc(100% - 1.5rem));
+			}
+
 			.top-confirm,
-			.top-notice {
+			.top-notice,
+			.side-notice {
 				border: 1px solid rgba(92, 70, 55, 0.16);
 				border-radius: var(--radius-lg);
 				background: rgba(255, 253, 249, 0.98);
@@ -167,6 +176,40 @@
 
 			.top-notice.error {
 				border-color: rgba(167, 53, 53, 0.28);
+			}
+
+			.side-notice {
+				position: relative;
+				overflow: hidden;
+				animation: side-notice-in 180ms ease;
+			}
+
+			.side-notice::before {
+				content: "";
+				position: absolute;
+				inset: 0 auto 0 0;
+				width: 0.4rem;
+				background: var(--secondary);
+			}
+
+			.side-notice strong {
+				color: var(--secondary);
+			}
+
+			.side-notice p {
+				color: var(--text);
+			}
+
+			@keyframes side-notice-in {
+				from {
+					opacity: 0;
+					transform: translateX(-10px);
+				}
+
+				to {
+					opacity: 1;
+					transform: translateX(0);
+				}
 			}
 
 			.top-message-content {
@@ -788,6 +831,13 @@
 					padding: var(--space-2);
 				}
 
+				.side-notice-stack {
+					top: auto;
+					bottom: var(--space-2);
+					left: var(--space-2);
+					width: calc(100% - 1rem);
+				}
+
 				.copy-button {
 					opacity: 1;
 					pointer-events: auto;
@@ -886,6 +936,18 @@
 					<div class="top-message-content">
 						<strong>{{ topNotice.title }}</strong>
 						<p>{{ topNotice.message }}</p>
+					</div>
+				</section>
+			</div>
+			<div class="side-notice-stack" aria-live="polite">
+				<section
+					v-if="sideNotice.visible"
+					class="side-notice"
+					role="status"
+				>
+					<div class="top-message-content">
+						<strong>{{ sideNotice.title }}</strong>
+						<p>{{ sideNotice.message }}</p>
 					</div>
 				</section>
 			</div>
@@ -2356,12 +2418,18 @@
 						message: "",
 						tone: "warn",
 					});
+					const sideNotice = reactive({
+						visible: false,
+						title: "",
+						message: "",
+					});
 					const editorForm = reactive(createEmptyForm());
 					const editorErrors = reactive({ name: false });
 					const editorSnapshot = ref("");
 					const cityOptions = Object.keys(DISTRICTS);
 					let confirmResolver = null;
 					let noticeTimer = 0;
+					let sideNoticeTimer = 0;
 
 					const districtOptions = computed(() =>
 						editorForm.city
@@ -2458,6 +2526,16 @@
 						noticeTimer = window.setTimeout(() => {
 							topNotice.visible = false;
 						}, 3200);
+					}
+
+					function showSideNotice(title, message, duration = 5000) {
+						window.clearTimeout(sideNoticeTimer);
+						sideNotice.title = title;
+						sideNotice.message = message;
+						sideNotice.visible = true;
+						sideNoticeTimer = window.setTimeout(() => {
+							sideNotice.visible = false;
+						}, duration);
 					}
 
 					async function copyField(value, label) {
@@ -2656,6 +2734,7 @@
 							note: editorForm.note.trim(),
 						};
 						if (editingId.value) {
+							const customerName = payload.name;
 							const index = state.records.findIndex(
 								(record) => record.id === editingId.value,
 							);
@@ -2667,6 +2746,10 @@
 								};
 							sortRecords();
 							discardEditor(true);
+							showSideNotice(
+								"已更新客戶",
+								`剛剛更新的是「${customerName}」`,
+							);
 							await persistAfterChange("已更新紀錄");
 							return;
 						}
@@ -3073,6 +3156,7 @@
 						statusTone,
 						topConfirm,
 						topNotice,
+						sideNotice,
 						editorForm,
 						editorErrors,
 						cityOptions,
