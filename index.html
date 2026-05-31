@@ -184,6 +184,30 @@
 				animation: side-notice-in 180ms ease;
 			}
 
+			.side-notice.warn {
+				border-color: rgba(162, 77, 36, 0.28);
+			}
+
+			.side-notice.warn::before {
+				background: var(--primary);
+			}
+
+			.side-notice.warn strong {
+				color: var(--primary);
+			}
+
+			.side-notice.error {
+				border-color: rgba(167, 53, 53, 0.28);
+			}
+
+			.side-notice.error::before {
+				background: var(--danger);
+			}
+
+			.side-notice.error strong {
+				color: var(--danger);
+			}
+
 			.side-notice::before {
 				content: "";
 				position: absolute;
@@ -927,22 +951,12 @@
 						</button>
 					</div>
 				</section>
-				<section
-					v-if="topNotice.visible"
-					class="top-notice"
-					:class="topNotice.tone"
-					role="status"
-				>
-					<div class="top-message-content">
-						<strong>{{ topNotice.title }}</strong>
-						<p>{{ topNotice.message }}</p>
-					</div>
-				</section>
 			</div>
 			<div class="side-notice-stack" aria-live="polite">
 				<section
 					v-if="sideNotice.visible"
 					class="side-notice"
+					:class="sideNotice.tone"
 					role="status"
 				>
 					<div class="top-message-content">
@@ -953,7 +967,7 @@
 			</div>
 			<main
 				class="shell"
-				:class="{ 'has-top-message': topConfirm.visible || topNotice.visible }"
+				:class="{ 'has-top-message': topConfirm.visible }"
 			>
 				<section class="panel" aria-labelledby="recordsTitle">
 					<div class="panel-header">
@@ -2422,6 +2436,7 @@
 						visible: false,
 						title: "",
 						message: "",
+						tone: "success",
 					});
 					const editorForm = reactive(createEmptyForm());
 					const editorErrors = reactive({ name: false });
@@ -2518,20 +2533,19 @@
 						tone = "warn",
 						title = "提醒",
 					) {
-						window.clearTimeout(noticeTimer);
-						topNotice.title = title;
-						topNotice.message = message;
-						topNotice.tone = tone;
-						topNotice.visible = true;
-						noticeTimer = window.setTimeout(() => {
-							topNotice.visible = false;
-						}, 3200);
+						showSideNotice(title, message, tone || "success", 5000);
 					}
 
-					function showSideNotice(title, message, duration = 5000) {
+					function showSideNotice(
+						title,
+						message,
+						tone = "success",
+						duration = 5000,
+					) {
 						window.clearTimeout(sideNoticeTimer);
 						sideNotice.title = title;
 						sideNotice.message = message;
+						sideNotice.tone = tone;
 						sideNotice.visible = true;
 						sideNoticeTimer = window.setTimeout(() => {
 							sideNotice.visible = false;
@@ -2749,6 +2763,7 @@
 							showSideNotice(
 								"已更新客戶",
 								`剛剛更新的是「${customerName}」`,
+								"success",
 							);
 							await persistAfterChange("已更新紀錄");
 							return;
