@@ -1,1660 +1,3034 @@
 <!doctype html>
 <html lang="zh-Hant">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QuickNote 客戶備忘錄</title>
-    <style>
-        :root {
-            color-scheme: light;
-            --page: #f4eadb;
-            --panel: rgba(255, 253, 249, 0.94);
-            --panel-strong: #fffdfa;
-            --muted: #f4ece0;
-            --text: #2d241e;
-            --text-soft: #6b5a4e;
-            --primary: #a24d24;
-            --primary-dark: #783617;
-            --secondary: #2f766f;
-            --secondary-soft: #dcece7;
-            --danger: #a73535;
-            --danger-soft: #f8d8d8;
-            --warning-soft: #f7dfdd;
-            --border: rgba(92, 70, 55, 0.18);
-            --shadow: 0 24px 54px rgba(86, 56, 34, 0.12);
-            --radius-xl: 24px;
-            --radius-lg: 18px;
-            --radius-md: 14px;
-            --space-1: 0.5rem;
-            --space-2: 0.75rem;
-            --space-3: 1rem;
-            --space-4: 1.25rem;
-            --space-5: 1.5rem;
-        }
-
-        * { box-sizing: border-box; }
-
-        html, body {
-            margin: 0;
-            min-height: 100%;
-        }
-
-        body {
-            font-family: "Noto Sans TC", "Microsoft JhengHei", "Segoe UI", sans-serif;
-            color: var(--text);
-            background:
-                radial-gradient(circle at top left, rgba(255, 216, 172, 0.88), transparent 34%),
-                radial-gradient(circle at top right, rgba(179, 223, 209, 0.72), transparent 34%),
-                linear-gradient(180deg, #fbf1e5 0%, var(--page) 100%);
-            padding: clamp(0.75rem, 2vw, 1.5rem);
-        }
-
-        button, input, select, textarea {
-            font: inherit;
-        }
-
-        button {
-            cursor: pointer;
-        }
-
-        [v-cloak] {
-            display: none;
-        }
-
-        .shell {
-            width: min(1060px, 100%);
-            margin: 0 auto;
-            display: grid;
-            gap: var(--space-3);
-            transition: padding-top 180ms ease;
-        }
-
-        .shell.has-top-message {
-            padding-top: 7.25rem;
-        }
-
-        .panel {
-            background: var(--panel);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow);
-            padding: clamp(1rem, 2.4vw, 1.55rem);
-            display: grid;
-            gap: var(--space-4);
-        }
-
-        .top-message-stack {
-            position: fixed;
-            top: clamp(0.75rem, 2vw, 1.5rem);
-            left: 50%;
-            z-index: 50;
-            width: min(520px, calc(100% - 1.5rem));
-            display: grid;
-            gap: var(--space-2);
-            transform: translateX(-50%);
-        }
-
-        .top-confirm, .top-notice {
-            border: 1px solid rgba(92, 70, 55, 0.16);
-            border-radius: var(--radius-lg);
-            background: rgba(255, 253, 249, 0.98);
-            box-shadow: 0 14px 34px rgba(86, 56, 34, 0.14);
-            padding: 1.25rem 1.35rem;
-        }
-
-        .top-confirm {
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: var(--space-3);
-        }
-
-        .top-confirm::before {
-            content: "";
-            position: absolute;
-            inset: 0 auto 0 0;
-            width: 0.45rem;
-            background: var(--primary);
-        }
-
-        .top-confirm.danger {
-            border-color: rgba(167, 53, 53, 0.36);
-            background: rgba(255, 253, 249, 0.98);
-            box-shadow: 0 16px 38px rgba(86, 56, 34, 0.16), 0 0 0 1px rgba(167, 53, 53, 0.06);
-        }
-
-        .top-confirm.danger::before {
-            background: var(--danger);
-        }
-
-        .top-confirm.danger .top-message-content strong {
-            color: var(--danger);
-        }
-
-        .top-confirm.danger .top-message-content p {
-            color: var(--text);
-        }
-
-        .top-confirm.danger .danger-button {
-            color: #fff;
-            background: linear-gradient(135deg, #b83232, var(--danger));
-            box-shadow: 0 10px 20px rgba(167, 53, 53, 0.22);
-        }
-
-        .top-notice.warn {
-            border-color: rgba(162, 77, 36, 0.28);
-        }
-
-        .top-notice.error {
-            border-color: rgba(167, 53, 53, 0.28);
-        }
-
-        .top-message-content {
-            display: grid;
-            gap: 0.45rem;
-        }
-
-        .top-message-content strong {
-            font-size: 1rem;
-        }
-
-        .top-message-content p {
-            color: var(--text-soft);
-            line-height: 1.6;
-        }
-
-        .top-confirm-actions {
-            display: flex;
-            align-items: center;
-            gap: var(--space-2);
-            flex-wrap: wrap;
-        }
-
-        .panel-header {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: var(--space-4);
-        }
-
-        h1, h2, h3, p {
-            margin: 0;
-        }
-
-        h1 {
-            font-size: clamp(1.55rem, 4vw, 2rem);
-            line-height: 1.2;
-        }
-
-        .results-meta, .hint, .record-title small {
-            color: var(--text-soft);
-        }
-
-        .toolbar {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: var(--space-3);
-            flex-wrap: wrap;
-        }
-
-        .toolbar-group, .toolbar-side, .record-actions, .record-meta {
-            display: flex;
-            align-items: center;
-            gap: var(--space-2);
-            flex-wrap: wrap;
-        }
-
-        .toolbar-side {
-            justify-content: flex-end;
-        }
-
-        .button, .ghost-button, .danger-button, .icon-button {
-            min-height: 44px;
-            border: 0;
-            border-radius: 999px;
-            padding: 0.75rem 1.15rem;
-            font-weight: 700;
-            color: var(--text);
-            transition: transform 160ms ease, box-shadow 160ms ease, background 160ms ease;
-        }
-
-        .button:disabled, .ghost-button:disabled, .danger-button:disabled, .icon-button:disabled {
-            cursor: not-allowed;
-            opacity: 0.52;
-            transform: none;
-        }
-
-        .button {
-            color: #fff;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
-            box-shadow: 0 14px 28px rgba(120, 54, 23, 0.18);
-        }
-
-        .ghost-button {
-            background: rgba(255, 255, 255, 0.72);
-            border: 1px solid rgba(91, 70, 55, 0.16);
-        }
-
-        .danger-button {
-            color: var(--danger);
-            background: var(--danger-soft);
-        }
-
-        .icon-button {
-            width: 52px;
-            min-width: 52px;
-            padding: 0;
-            color: var(--secondary);
-            background: rgba(47, 118, 111, 0.12);
-            display: inline-grid;
-            place-items: center;
-        }
-
-        .button:hover, .ghost-button:hover, .danger-button:hover, .icon-button:hover {
-            transform: translateY(-1px);
-        }
-
-        .button:focus-visible, .ghost-button:focus-visible, .danger-button:focus-visible, .icon-button:focus-visible,
-        input:focus, select:focus, textarea:focus {
-            outline: 3px solid rgba(47, 118, 111, 0.22);
-            outline-offset: 2px;
-        }
-
-        .icon-button svg {
-            width: 1.2rem;
-            height: 1.2rem;
-            stroke: currentColor;
-            fill: none;
-            stroke-width: 1.9;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-        }
-
-        .status-pill {
-            min-height: 44px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 999px;
-            padding: 0.72rem 1rem;
-            color: var(--secondary);
-            background: var(--secondary-soft);
-            font-weight: 700;
-        }
-
-        .status-pill.warn {
-            color: #9a3838;
-            background: var(--warning-soft);
-        }
-
-        .status-pill.error {
-            color: var(--danger);
-            background: var(--danger-soft);
-        }
-
-        .search-input, .field input, .field select, .field textarea, .settings-edit-form input {
-            width: 100%;
-            min-height: 3rem;
-            border: 1px solid rgba(92, 70, 55, 0.16);
-            border-radius: var(--radius-md);
-            background: var(--panel-strong);
-            color: var(--text);
-            padding: 0.85rem 1rem;
-        }
-
-        .date-input-wrap {
-            position: relative;
-        }
-
-        .date-input-icon {
-            position: absolute;
-            top: 50%;
-            right: 1rem;
-            width: 1.1rem;
-            height: 1.1rem;
-            transform: translateY(-50%);
-            color: var(--text-soft);
-            stroke: currentColor;
-            fill: none;
-            stroke-width: 1.9;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            pointer-events: none;
-        }
-
-        .field .date-input {
-            cursor: pointer;
-            padding-right: 3rem;
-        }
-
-        .vc-container {
-            --vc-font-family: "Noto Sans TC", "Microsoft JhengHei", "Segoe UI", sans-serif;
-            --vc-accent-50: #f8eee8;
-            --vc-accent-100: #f1dfd3;
-            --vc-accent-200: #e7c4ae;
-            --vc-accent-300: #dba381;
-            --vc-accent-400: #c67848;
-            --vc-accent-500: var(--primary);
-            --vc-accent-600: var(--primary-dark);
-            --vc-accent-700: #612a11;
-            border-color: rgba(92, 70, 55, 0.16);
-            border-radius: var(--radius-lg);
-            box-shadow: 0 18px 42px rgba(86, 56, 34, 0.16);
-        }
-
-        .vc-popover-content {
-            border-radius: var(--radius-lg);
-        }
-
-        .search-input {
-            min-height: 3.35rem;
-        }
-
-        textarea {
-            resize: vertical;
-            min-height: 7rem;
-        }
-
-        .records-grid {
-            display: grid;
-            gap: var(--space-3);
-        }
-
-        .record-card, .empty-state {
-            border: 1px solid rgba(162, 77, 36, 0.16);
-            border-radius: var(--radius-lg);
-            background: linear-gradient(180deg, rgba(255, 255, 255, 0.88), rgba(255, 250, 244, 0.94));
-        }
-
-        .record-card {
-            display: grid;
-            gap: var(--space-3);
-            padding: var(--space-4);
-        }
-
-        .record-card.editing {
-            border-color: rgba(47, 118, 111, 0.3);
-            background: linear-gradient(180deg, rgba(250, 255, 253, 0.96), rgba(244, 252, 249, 0.94));
-        }
-
-        .record-card.selected {
-            border-color: rgba(47, 118, 111, 0.42);
-            box-shadow: 0 18px 36px rgba(47, 118, 111, 0.12);
-        }
-
-        .record-card.selectable {
-            cursor: pointer;
-        }
-
-        .record-card.selectable:hover {
-            border-color: rgba(47, 118, 111, 0.34);
-            transform: translateY(-1px);
-        }
-
-        .record-card.selectable:focus-visible {
-            outline: 3px solid rgba(47, 118, 111, 0.28);
-            outline-offset: 3px;
-        }
-
-        .record-top {
-            display: flex;
-            align-items: flex-start;
-            justify-content: space-between;
-            gap: var(--space-3);
-            flex-wrap: wrap;
-        }
-
-        .record-title {
-            display: grid;
-            gap: 0.35rem;
-        }
-
-        .record-select-label {
-            min-height: 44px;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.55rem;
-            color: var(--secondary);
-            font-weight: 800;
-        }
-
-        .record-select-label input {
-            width: 1.1rem;
-            height: 1.1rem;
-            accent-color: var(--secondary);
-        }
-
-        .selection-count {
-            min-height: 44px;
-            display: inline-flex;
-            align-items: center;
-            border-radius: 999px;
-            padding: 0.72rem 1rem;
-            color: var(--secondary);
-            background: var(--secondary-soft);
-            font-weight: 800;
-        }
-
-        .record-item, .record-note {
-            border-radius: var(--radius-md);
-            padding: 1rem;
-            white-space: pre-wrap;
-            word-break: break-word;
-            line-height: 1.7;
-        }
-
-        .record-item {
-            background: rgba(162, 77, 36, 0.08);
-            font-weight: 700;
-        }
-
-        .record-note {
-            background: var(--muted);
-            color: var(--text-soft);
-        }
-
-        .pill {
-            min-height: 36px;
-            display: inline-flex;
-            align-items: center;
-            border-radius: 999px;
-            padding: 0.38rem 0.8rem;
-            color: var(--secondary);
-            background: var(--secondary-soft);
-            font-weight: 700;
-        }
-
-        .pill.muted {
-            color: var(--text-soft);
-            background: rgba(91, 70, 55, 0.1);
-        }
-
-        .empty-state {
-            text-align: center;
-            display: grid;
-            gap: var(--space-2);
-            padding: clamp(2.5rem, 7vw, 4.2rem) var(--space-4);
-            border-style: dashed;
-        }
-
-        .editor-form {
-            display: grid;
-            gap: var(--space-3);
-        }
-
-        .form-grid {
-            display: grid;
-            gap: var(--space-3);
-        }
-
-        .form-grid.two {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
-        }
-
-        .field {
-            display: grid;
-            gap: 0.45rem;
-        }
-
-        .field label, .field legend {
-            font-weight: 700;
-        }
-
-        .field.invalid input {
-            border-color: rgba(167, 53, 53, 0.7);
-            background: #fff5f3;
-            box-shadow: 0 0 0 4px rgba(167, 53, 53, 0.1);
-        }
-
-        .field-error {
-            color: var(--danger);
-            font-size: 0.9rem;
-            font-weight: 700;
-        }
-
-        .required-mark {
-            color: var(--danger);
-            margin-left: 0.2rem;
-        }
-
-        fieldset.field {
-            border: 0;
-            padding: 0;
-            margin: 0;
-        }
-
-        .checkbox-group {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.65rem;
-        }
-
-        .checkbox-chip {
-            min-height: 44px;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-            border: 1px solid rgba(162, 77, 36, 0.16);
-            border-radius: 999px;
-            background: rgba(255, 255, 255, 0.72);
-            padding: 0.68rem 0.9rem;
-        }
-
-        .checkbox-chip input {
-            width: 1rem;
-            height: 1rem;
-            accent-color: var(--secondary);
-        }
-
-        .overlay {
-            position: fixed;
-            inset: 0;
-            display: grid;
-            place-items: center;
-            padding: var(--space-3);
-            background: rgba(42, 29, 20, 0.42);
-            z-index: 10;
-        }
-
-        .modal {
-            width: min(720px, 100%);
-            max-height: min(820px, 92vh);
-            overflow: auto;
-            background: var(--panel-strong);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-xl);
-            box-shadow: var(--shadow);
-            padding: var(--space-5);
-            display: grid;
-            gap: var(--space-4);
-        }
-
-        .settings-section {
-            display: grid;
-            gap: var(--space-3);
-        }
-
-        .settings-actions, .settings-list {
-            display: grid;
-            gap: var(--space-2);
-        }
-
-        .settings-actions {
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-        }
-
-        .settings-item {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: var(--space-2);
-            border: 1px solid rgba(92, 70, 55, 0.12);
-            border-radius: var(--radius-md);
-            background: rgba(247, 241, 234, 0.7);
-            padding: 0.75rem 0.9rem;
-        }
-
-        .settings-item-actions {
-            display: flex;
-            gap: var(--space-2);
-            flex-wrap: wrap;
-        }
-
-        .settings-edit-form {
-            width: 100%;
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: var(--space-2);
-            align-items: center;
-        }
-
-        .inline-form {
-            display: grid;
-            grid-template-columns: minmax(0, 1fr) auto;
-            gap: var(--space-2);
-            align-items: end;
-        }
-
-        .visually-hidden {
-            position: absolute;
-            width: 1px;
-            height: 1px;
-            overflow: hidden;
-            clip: rect(0, 0, 0, 0);
-            white-space: nowrap;
-        }
-
-        @media (max-width: 760px) {
-            body {
-                padding: var(--space-2);
-            }
-
-            .panel-header, .toolbar, .toolbar-side, .record-top, .settings-item {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .top-confirm {
-                align-items: stretch;
-                flex-direction: column;
-            }
-
-            .toolbar-group, .toolbar-side, .record-actions, .settings-item-actions {
-                width: 100%;
-            }
-
-            .toolbar-group button, .toolbar-side button, .record-actions button, .settings-actions button,
-            .inline-form button, .settings-item-actions button, .top-confirm-actions button {
-                width: 100%;
-            }
-
-            .status-pill {
-                width: 100%;
-            }
-
-            .form-grid.two, .inline-form, .settings-edit-form {
-                grid-template-columns: 1fr;
-            }
-
-            .record-card, .panel, .modal {
-                padding: var(--space-3);
-            }
-        }
-    </style>
-</head>
-<body>
-    <div id="app" v-cloak>
-        <div class="top-message-stack" aria-live="polite">
-            <section v-if="topConfirm.visible" class="top-confirm" :class="topConfirm.tone" role="dialog" aria-labelledby="topConfirmTitle">
-                <div class="top-message-content">
-                    <strong id="topConfirmTitle">{{ topConfirm.title }}</strong>
-                    <p>{{ topConfirm.message }}</p>
-                </div>
-                <div class="top-confirm-actions">
-                    <button class="danger-button" type="button" data-top-confirm-button @click="resolveTopConfirm(true)">{{ topConfirm.confirmText }}</button>
-                    <button class="ghost-button" type="button" @click="resolveTopConfirm(false)">{{ topConfirm.cancelText }}</button>
-                </div>
-            </section>
-            <section v-if="topNotice.visible" class="top-notice" :class="topNotice.tone" role="status">
-                <div class="top-message-content">
-                    <strong>{{ topNotice.title }}</strong>
-                    <p>{{ topNotice.message }}</p>
-                </div>
-            </section>
-        </div>
-        <main class="shell" :class="{ 'has-top-message': topConfirm.visible || topNotice.visible }">
-            <section class="panel" aria-labelledby="recordsTitle">
-                <div class="panel-header">
-                    <div>
-                        <h1 id="recordsTitle">紀錄列表</h1>
-                    </div>
-                    <div class="results-meta">{{ resultsMeta }}</div>
-                </div>
-
-                <div class="toolbar">
-                    <div class="toolbar-group">
-                        <template v-if="selectionMode">
-                            <span class="selection-count">已選 {{ selectedRecordIds.length }} 筆</span>
-                            <button class="ghost-button" type="button" @click="toggleSelectAllVisible" :disabled="!filteredRecords.length">{{ allVisibleSelected ? '取消全選' : '全選目前列表' }}</button>
-                            <button class="danger-button" type="button" @click="deleteSelectedRecords" :disabled="!selectedRecordIds.length">刪除選取</button>
-                            <button class="ghost-button" type="button" @click="cancelSelectionMode">取消</button>
-                        </template>
-                        <template v-else>
-                            <button class="button" type="button" @click="startCreate">新增紀錄</button>
-                            <button class="ghost-button" type="button" @click="clearSearch">清除搜尋</button>
-                            <button class="danger-button" type="button" @click="startSelectionMode" :disabled="!state.records.length">多選刪除</button>
-                        </template>
-                    </div>
-                    <div class="toolbar-side">
-                        <button class="icon-button" type="button" aria-label="設定" @click="openSettings">
-                            <svg viewBox="0 0 24 24" aria-hidden="true">
-                                <circle cx="12" cy="12" r="3.2"></circle>
-                                <path d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a2 2 0 1 1-4 0v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H4a2 2 0 1 1 0-4h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V4a2 2 0 1 1 4 0v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6h.2a2 2 0 1 1 0 4h-.2a1 1 0 0 0-.9.6z"></path>
-                            </svg>
-                        </button>
-                    </div>
-                </div>
-
-                <label class="visually-hidden" for="searchInput">搜尋</label>
-                <input id="searchInput" class="search-input" v-model.trim="searchQuery" type="search" autocomplete="off" placeholder="搜尋客戶名、日期、貨品、行政區、送貨方式或備註">
-
-                <div class="records-grid">
-                    <article v-if="isCreating" class="record-card editing">
-                        <record-editor
-                            :form="editorForm"
-                            :errors="editorErrors"
-                            :city-options="cityOptions"
-                            :district-options="districtOptions"
-                            :shipping-options="state.shippingOptions"
-                            mode="create"
-                            @save="submitEditor"
-                            @cancel="cancelEditor"
-                        ></record-editor>
-                    </article>
-
-                    <article
-                        v-for="record in filteredRecords"
-                        :key="record.id"
-                        class="record-card"
-                        :class="{ editing: editingId === record.id, selected: isRecordSelected(record.id), selectable: selectionMode }"
-                        :role="selectionMode ? 'checkbox' : null"
-                        :aria-checked="selectionMode ? isRecordSelected(record.id) : null"
-                        :tabindex="selectionMode ? 0 : null"
-                        @click="toggleRecordSelectionFromCard(record.id)"
-                        @keydown.enter.prevent="toggleRecordSelectionFromCard(record.id)"
-                        @keydown.space.prevent="toggleRecordSelectionFromCard(record.id)"
-                    >
-                        <record-editor
-                            v-if="editingId === record.id"
-                            :form="editorForm"
-                            :errors="editorErrors"
-                            :city-options="cityOptions"
-                            :district-options="districtOptions"
-                            :shipping-options="state.shippingOptions"
-                            mode="edit"
-                            @save="submitEditor"
-                            @cancel="cancelEditor"
-                            @delete="deleteRecord(record.id)"
-                        ></record-editor>
-
-                        <template v-else>
-                            <div class="record-top">
-                                <div v-if="selectionMode" class="record-select-label">
-                                    <input type="checkbox" :checked="isRecordSelected(record.id)" tabindex="-1" @click.prevent>
-                                    <span>選取</span>
-                                </div>
-                                <div class="record-title">
-                                    <h3>{{ record.name }}</h3>
-                                    <small>{{ record.city }}{{ record.district }}</small>
-                                </div>
-                                <div v-if="!selectionMode" class="record-actions">
-                                    <button class="ghost-button" type="button" @click="startEdit(record)">編輯</button>
-                                    <button class="danger-button" type="button" @click="deleteRecord(record.id)">刪除</button>
-                                </div>
-                            </div>
-                            <div class="record-meta">
-                                <span class="pill muted">出貨：{{ record.deliveryDate ? formatDeliveryDate(record.deliveryDate) : '未設定日期' }}</span>
-                                <span v-if="!record.shipping.length" class="pill muted">未選擇送貨方式</span>
-                                <span v-for="item in record.shipping" :key="item" class="pill">{{ item }}</span>
-                            </div>
-                            <div class="record-item">{{ record.item || '尚未填寫貨品內容' }}</div>
-                            <div class="record-note">{{ record.note || '尚未填寫備註' }}</div>
-                            <div class="record-meta">
-                                <span class="pill muted">建立：{{ formatDateTime(record.createdAt) }}</span>
-                                <span v-if="hasUpdated(record)" class="pill muted">更新：{{ formatDateTime(record.updatedAt) }}</span>
-                            </div>
-                        </template>
-                    </article>
-
-                    <div v-if="!isCreating && !filteredRecords.length" class="empty-state">
-                        <h3>{{ state.records.length ? '找不到符合條件的資料' : '還沒有客戶資料' }}</h3>
-                        <p>{{ state.records.length ? '可以換個關鍵字，或直接按新增紀錄插入一張新的空白卡片。' : '先按新增紀錄，列表最上方就會出現一張可直接輸入的空白卡片。' }}</p>
-                    </div>
-                </div>
-            </section>
-        </main>
-
-        <div v-if="showSettings" class="overlay" role="presentation" @click.self="closeSettings">
-            <section class="modal" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
-                <div class="panel-header">
-                    <div>
-                        <h2 id="settingsTitle">設定</h2>
-                    </div>
-                    <button class="ghost-button" type="button" @click="closeSettings">關閉</button>
-                </div>
-
-                <section class="settings-section" aria-labelledby="dataActionsTitle">
-                    <div>
-                        <h3 id="dataActionsTitle">資料操作</h3>
-                    </div>
-                    <div class="settings-actions">
-                        <button class="ghost-button" type="button" @click="openDataFile">開啟 JSON</button>
-                        <button class="button" type="button" @click="manualSave">儲存 JSON</button>
-                        <button class="ghost-button" type="button" @click="exportJsonFile">下載副本</button>
-                        <button class="danger-button" type="button" @click="clearAllRecords">清空全部紀錄</button>
-                    </div>
-                </section>
-
-                <section class="settings-section" aria-labelledby="shippingSettingsTitle">
-                    <div>
-                        <h3 id="shippingSettingsTitle">送貨方式設定</h3>
-                    </div>
-                    <form class="inline-form" @submit.prevent="addShippingOption">
-                        <div class="field">
-                            <label for="shippingOptionInput">新增送貨方式</label>
-                            <input id="shippingOptionInput" v-model.trim="newShippingOption" autocomplete="off" placeholder="例如：黑貓宅配">
-                        </div>
-                        <button class="button" type="submit">新增選項</button>
-                    </form>
-                    <div class="settings-list">
-                        <div v-if="!state.shippingOptions.length" class="empty-state">
-                            <h3>尚無送貨方式</h3>
-                        </div>
-                        <div v-for="option in state.shippingOptions" :key="option" class="settings-item">
-                            <form v-if="editingShippingOption === option" class="settings-edit-form" @submit.prevent="saveShippingOptionRename(option)">
-                                <input data-shipping-edit-input v-model.trim="shippingOptionDraft" autocomplete="off" aria-label="修改送貨方式名稱">
-                                <div class="settings-item-actions">
-                                    <button class="button" type="submit">儲存</button>
-                                    <button class="ghost-button" type="button" @click="cancelShippingOptionRename">取消</button>
-                                </div>
-                            </form>
-                            <template v-else>
-                                <strong>{{ option }}</strong>
-                                <div class="settings-item-actions">
-                                    <button class="ghost-button" type="button" @click="startRenameShippingOption(option)">改名</button>
-                                    <button class="danger-button" type="button" @click="deleteShippingOption(option)">刪除</button>
-                                </div>
-                            </template>
-                        </div>
-                    </div>
-                </section>
-            </section>
-        </div>
-
-        <input ref="importInput" type="file" accept="application/json,.json" hidden @change="importJsonFile">
-    </div>
-
-    <template id="record-editor-template">
-        <form class="editor-form" novalidate @submit.prevent="$emit('save')">
-            <div class="record-top">
-                <div class="record-title">
-                    <h3>{{ mode === 'create' ? '新增紀錄' : '編輯紀錄' }}</h3>
-                    <small>{{ mode === 'create' ? '這張空白卡片就是新的輸入區塊。' : '直接在原本位置修改。' }}</small>
-                </div>
-                <div class="record-actions">
-                    <button class="button" type="submit">{{ mode === 'create' ? '儲存新增' : '儲存修改' }}</button>
-                    <button class="ghost-button" type="button" @click="$emit('cancel')">取消</button>
-                    <button v-if="mode === 'edit'" class="danger-button" type="button" @click="$emit('delete')">刪除</button>
-                </div>
-            </div>
-
-            <div class="form-grid two">
-                <div class="field" :class="{ invalid: errors.name }">
-                    <label>客戶名<span class="required-mark" aria-hidden="true">*</span></label>
-                    <input data-editor-autofocus v-model.trim="form.name" autocomplete="off" placeholder="例如：王小姐" aria-required="true" :aria-invalid="errors.name ? 'true' : 'false'" :aria-describedby="errors.name ? 'customerNameError' : null">
-                    <p v-if="errors.name" id="customerNameError" class="field-error">必填</p>
-                </div>
-                <div class="field">
-                    <label>出貨日期</label>
-                    <v-date-picker
-                        v-model.string="form.deliveryDate"
-                        :masks="{ input: 'YYYY / MM / DD', modelValue: 'YYYY-MM-DD' }"
-                        :popover="{ visibility: 'click', placement: 'bottom-start' }"
-                    >
-                        <template #default="{ inputValue, inputEvents }">
-                            <div class="date-input-wrap">
-                                <input class="date-input" :value="inputValue" v-on="inputEvents" readonly placeholder="請選擇出貨日期">
-                                <svg class="date-input-icon" viewBox="0 0 24 24" aria-hidden="true">
-                                    <path d="M8 2v4"></path>
-                                    <path d="M16 2v4"></path>
-                                    <path d="M3.5 9h17"></path>
-                                    <rect x="4" y="5" width="16" height="16" rx="2"></rect>
-                                </svg>
-                            </div>
-                        </template>
-                    </v-date-picker>
-                </div>
-            </div>
-
-            <div class="field">
-                <label>貨品內容</label>
-                <textarea v-model.trim="form.item" placeholder="例如：禮盒 2 組、常溫一箱"></textarea>
-            </div>
-
-            <div class="form-grid two">
-                <div class="field">
-                    <label>縣市</label>
-                    <select v-model="form.city">
-                        <option value="">請選擇縣市</option>
-                        <option v-for="city in cityOptions" :key="city" :value="city">{{ city }}</option>
-                    </select>
-                </div>
-                <div class="field">
-                    <label>行政區</label>
-                    <select v-model="form.district" :disabled="!districtOptions.length">
-                        <option value="">{{ districtOptions.length ? '請選擇行政區' : '請先選擇縣市' }}</option>
-                        <option v-for="district in districtOptions" :key="district" :value="district">{{ district }}</option>
-                    </select>
-                </div>
-            </div>
-
-            <fieldset class="field">
-                <legend>送貨方式</legend>
-                <div class="checkbox-group">
-                    <label v-for="option in shippingOptions" :key="option" class="checkbox-chip">
-                        <input v-model="form.shipping" type="checkbox" :value="option">
-                        <span>{{ option }}</span>
-                    </label>
-                </div>
-                <p class="hint">送貨方式可到設定增減或改名。</p>
-            </fieldset>
-
-            <div class="field">
-                <label>備註</label>
-                <textarea v-model.trim="form.note" placeholder="例如：上午前送到比較方便。"></textarea>
-            </div>
-        </form>
-    </template>
-
-    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
-    <script src="https://unpkg.com/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
-    <script>window.PopperCore = window.Popper;</script>
-    <script src="https://unpkg.com/v-calendar@3.1.2/dist/iife/index.js"></script>
-    <script>
-        const DISTRICTS = {
-            "台北市": ["中正區", "大同區", "中山區", "松山區", "大安區", "萬華區", "信義區", "士林區", "北投區", "內湖區", "南港區", "文山區"],
-            "新北市": ["板橋區", "三重區", "中和區", "永和區", "新莊區", "新店區", "樹林區", "鶯歌區", "三峽區", "淡水區", "汐止區", "瑞芳區", "土城區", "蘆洲區", "五股區", "泰山區", "林口區", "深坑區", "石碇區", "坪林區", "三芝區", "石門區", "八里區", "平溪區", "雙溪區", "貢寮區", "金山區", "萬里區", "烏來區"],
-            "桃園市": ["桃園區", "中壢區", "平鎮區", "八德區", "楊梅區", "蘆竹區", "大溪區", "龍潭區", "龜山區", "大園區", "觀音區", "新屋區", "復興區"],
-            "台中市": ["中區", "東區", "南區", "西區", "北區", "西屯區", "南屯區", "北屯區", "豐原區", "東勢區", "大甲區", "清水區", "沙鹿區", "梧棲區", "后里區", "神岡區", "潭子區", "大雅區", "新社區", "石岡區", "外埔區", "大安區", "烏日區", "大肚區", "龍井區", "霧峰區", "太平區", "大里區", "和平區"],
-            "台南市": ["中西區", "東區", "南區", "北區", "安平區", "安南區", "永康區", "歸仁區", "新化區", "左鎮區", "玉井區", "楠西區", "南化區", "仁德區", "關廟區", "龍崎區", "官田區", "麻豆區", "佳里區", "西港區", "七股區", "將軍區", "學甲區", "北門區", "新營區", "後壁區", "白河區", "東山區", "六甲區", "下營區", "柳營區", "鹽水區", "善化區", "大內區", "山上區", "新市區", "安定區"],
-            "高雄市": ["新興區", "前金區", "苓雅區", "鹽埕區", "鼓山區", "旗津區", "前鎮區", "三民區", "楠梓區", "小港區", "左營區", "仁武區", "大社區", "岡山區", "路竹區", "阿蓮區", "田寮區", "燕巢區", "橋頭區", "梓官區", "彌陀區", "永安區", "湖內區", "鳳山區", "大寮區", "林園區", "鳥松區", "大樹區", "旗山區", "美濃區", "六龜區", "內門區", "杉林區", "甲仙區", "桃源區", "那瑪夏區", "茂林區", "茄萣區"],
-            "基隆市": ["仁愛區", "信義區", "中正區", "中山區", "安樂區", "暖暖區", "七堵區"],
-            "新竹市": ["東區", "北區", "香山區"],
-            "嘉義市": ["東區", "西區"],
-            "新竹縣": ["竹北市", "湖口鄉", "新豐鄉", "新埔鎮", "關西鎮", "芎林鄉", "寶山鄉", "竹東鎮", "五峰鄉", "橫山鄉", "尖石鄉", "北埔鄉", "峨眉鄉"],
-            "苗栗縣": ["竹南鎮", "頭份市", "三灣鄉", "南庄鄉", "獅潭鄉", "後龍鎮", "通霄鎮", "苑裡鎮", "苗栗市", "造橋鄉", "頭屋鄉", "公館鄉", "大湖鄉", "泰安鄉", "銅鑼鄉", "三義鄉", "西湖鄉", "卓蘭鎮"],
-            "彰化縣": ["彰化市", "芬園鄉", "花壇鄉", "秀水鄉", "鹿港鎮", "福興鄉", "線西鄉", "和美鎮", "伸港鄉", "員林市", "社頭鄉", "永靖鄉", "埔心鄉", "溪湖鎮", "大村鄉", "埔鹽鄉", "田中鎮", "北斗鎮", "田尾鄉", "埤頭鄉", "溪州鄉", "竹塘鄉", "二林鎮", "大城鄉", "芳苑鄉", "二水鄉"],
-            "南投縣": ["南投市", "中寮鄉", "草屯鎮", "國姓鄉", "埔里鎮", "仁愛鄉", "名間鄉", "集集鎮", "水里鄉", "魚池鄉", "信義鄉", "竹山鎮", "鹿谷鄉"],
-            "雲林縣": ["斗六市", "斗南鎮", "虎尾鎮", "西螺鎮", "土庫鎮", "北港鎮", "古坑鄉", "大埤鄉", "莿桐鄉", "林內鄉", "二崙鄉", "崙背鄉", "麥寮鄉", "東勢鄉", "褒忠鄉", "台西鄉", "元長鄉", "四湖鄉", "口湖鄉", "水林鄉"],
-            "嘉義縣": ["太保市", "朴子市", "布袋鎮", "大林鎮", "民雄鄉", "溪口鄉", "新港鄉", "六腳鄉", "東石鄉", "義竹鄉", "鹿草鄉", "水上鄉", "中埔鄉", "竹崎鄉", "梅山鄉", "番路鄉", "大埔鄉", "阿里山鄉"],
-            "屏東縣": ["屏東市", "三地門鄉", "霧台鄉", "瑪家鄉", "九如鄉", "里港鄉", "高樹鄉", "鹽埔鄉", "長治鄉", "麟洛鄉", "竹田鄉", "內埔鄉", "萬丹鄉", "潮州鎮", "泰武鄉", "來義鄉", "萬巒鄉", "崁頂鄉", "新埤鄉", "南州鄉", "林邊鄉", "東港鎮", "琉球鄉", "佳冬鄉", "新園鄉", "枋寮鄉", "枋山鄉", "春日鄉", "獅子鄉", "車城鄉", "牡丹鄉", "恆春鎮", "滿州鄉"],
-            "宜蘭縣": ["宜蘭市", "羅東鎮", "蘇澳鎮", "頭城鎮", "礁溪鄉", "壯圍鄉", "員山鄉", "冬山鄉", "五結鄉", "三星鄉", "大同鄉", "南澳鄉"],
-            "花蓮縣": ["花蓮市", "鳳林鎮", "玉里鎮", "新城鄉", "吉安鄉", "壽豐鄉", "光復鄉", "豐濱鄉", "瑞穗鄉", "富里鄉", "秀林鄉", "萬榮鄉", "卓溪鄉"],
-            "台東縣": ["台東市", "成功鎮", "關山鎮", "卑南鄉", "鹿野鄉", "池上鄉", "東河鄉", "長濱鄉", "太麻里鄉", "大武鄉", "綠島鄉", "海端鄉", "延平鄉", "金峰鄉", "達仁鄉", "蘭嶼鄉"],
-            "澎湖縣": ["馬公市", "湖西鄉", "白沙鄉", "西嶼鄉", "望安鄉", "七美鄉"],
-            "金門縣": ["金城鎮", "金沙鎮", "金湖鎮", "金寧鄉", "烈嶼鄉", "烏坵鄉"],
-            "連江縣": ["南竿鄉", "北竿鄉", "莒光鄉", "東引鄉"]
-        };
-
-        const DEFAULT_SHIPPING_OPTIONS = ["自送", "自取", "華誠(小)", "華誠(中)", "華誠(大)", "D.Y.", "D", "東宜", "大粲"];
-        const STORAGE_KEY = "quicknote-state-v2";
-        const LEGACY_STORAGE_KEY = "quicknote-state-v1";
-        const HANDLE_DB_NAME = "quicknote-file-handles";
-        const HANDLE_STORE_NAME = "handles";
-        const HANDLE_KEY = "primary-data-file";
-
-        const { createApp, reactive, ref, computed, watch, nextTick } = Vue;
-
-        function createDefaultState() {
-            return { shippingOptions: [...DEFAULT_SHIPPING_OPTIONS], records: [] };
-        }
-
-        function uniqueTrimmedList(values, fallback = []) {
-            const source = Array.isArray(values) ? values : fallback;
-            return [...new Set(source.map((item) => String(item ?? "").trim()).filter(Boolean))];
-        }
-
-        function normalizeDateValue(value) {
-            return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value.trim()) ? value.trim() : "";
-        }
-
-        function isValidDate(value) {
-            return !Number.isNaN(new Date(value).getTime());
-        }
-
-        function createId() {
-            return window.crypto && typeof window.crypto.randomUUID === "function"
-                ? window.crypto.randomUUID()
-                : `id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
-        }
-
-        function normalizeRecord(record) {
-            if (!record || typeof record !== "object") return null;
-            const name = String(record.name ?? "").trim();
-            const city = String(record.city ?? "").trim();
-            const district = String(record.district ?? "").trim();
-            if (!name) return null;
-            const createdAt = isValidDate(record.createdAt) ? record.createdAt : new Date().toISOString();
-            const updatedAt = record.updatedAt && isValidDate(record.updatedAt) ? record.updatedAt : createdAt;
-            return {
-                id: String(record.id ?? createId()),
-                name,
-                deliveryDate: normalizeDateValue(record.deliveryDate),
-                item: String(record.item ?? "").trim(),
-                city,
-                district,
-                shipping: uniqueTrimmedList(record.shipping),
-                note: String(record.note ?? "").trim(),
-                createdAt,
-                updatedAt
-            };
-        }
-
-        function normalizeState(raw) {
-            const next = createDefaultState();
-            next.shippingOptions = uniqueTrimmedList(raw?.shippingOptions, DEFAULT_SHIPPING_OPTIONS);
-            next.records = Array.isArray(raw?.records)
-                ? raw.records.map(normalizeRecord).filter(Boolean).sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))
-                : [];
-            return next;
-        }
-
-        function loadInitialState() {
-            try {
-                const cached = localStorage.getItem(STORAGE_KEY) || localStorage.getItem(LEGACY_STORAGE_KEY);
-                return cached ? normalizeState(JSON.parse(cached)) : createDefaultState();
-            } catch {
-                return createDefaultState();
-            }
-        }
-
-        function supportsFileSystemAccess() {
-            return typeof window.showOpenFilePicker === "function" && typeof window.showSaveFilePicker === "function";
-        }
-
-        function formatDateTime(value) {
-            const date = new Date(value);
-            return Number.isNaN(date.getTime()) ? "時間格式錯誤" : new Intl.DateTimeFormat("zh-TW", {
-                year: "numeric", month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit"
-            }).format(date);
-        }
-
-        function formatDeliveryDate(value) {
-            if (!value) return "";
-            const date = new Date(`${value}T00:00:00`);
-            return Number.isNaN(date.getTime()) ? value : new Intl.DateTimeFormat("zh-TW", {
-                year: "numeric", month: "2-digit", day: "2-digit"
-            }).format(date);
-        }
-
-        function hasUpdated(record) {
-            return Boolean(record?.updatedAt) && record.updatedAt !== record.createdAt;
-        }
-
-        async function verifyFilePermission(handle, writable) {
-            const options = writable ? { mode: "readwrite" } : {};
-            if (typeof handle.queryPermission === "function" && await handle.queryPermission(options) === "granted") return true;
-            if (typeof handle.requestPermission === "function") return await handle.requestPermission(options) === "granted";
-            return true;
-        }
-
-        async function writeToDataFile(handle, state) {
-            const writable = await handle.createWritable();
-            await writable.write(JSON.stringify({ shippingOptions: state.shippingOptions, records: state.records }, null, 2));
-            await writable.close();
-        }
-
-        async function readDataFile(handle) {
-            const file = await handle.getFile();
-            const text = await file.text();
-            return text.trim() ? JSON.parse(text) : createDefaultState();
-        }
-
-        function openDb() {
-            return new Promise((resolve, reject) => {
-                const request = indexedDB.open(HANDLE_DB_NAME, 1);
-                request.addEventListener("upgradeneeded", () => request.result.createObjectStore(HANDLE_STORE_NAME));
-                request.addEventListener("success", () => resolve(request.result));
-                request.addEventListener("error", () => reject(request.error));
-            });
-        }
-
-        async function storeFileHandle(handle) {
-            const db = await openDb();
-            await new Promise((resolve, reject) => {
-                const transaction = db.transaction(HANDLE_STORE_NAME, "readwrite");
-                transaction.objectStore(HANDLE_STORE_NAME).put(handle, HANDLE_KEY);
-                transaction.addEventListener("complete", resolve);
-                transaction.addEventListener("error", () => reject(transaction.error));
-            });
-            db.close();
-        }
-
-        async function getStoredFileHandle() {
-            try {
-                const db = await openDb();
-                const handle = await new Promise((resolve, reject) => {
-                    const transaction = db.transaction(HANDLE_STORE_NAME, "readonly");
-                    const request = transaction.objectStore(HANDLE_STORE_NAME).get(HANDLE_KEY);
-                    request.addEventListener("success", () => resolve(request.result ?? null));
-                    request.addEventListener("error", () => reject(request.error));
-                });
-                db.close();
-                return handle;
-            } catch {
-                return null;
-            }
-        }
-
-        const app = createApp({
-            setup() {
-                const state = reactive(loadInitialState());
-                const fileHandle = ref(null);
-                const searchQuery = ref("");
-                const showSettings = ref(false);
-                const newShippingOption = ref("");
-                const editingShippingOption = ref("");
-                const shippingOptionDraft = ref("");
-                const importInput = ref(null);
-                const editingId = ref(null);
-                const isCreating = ref(false);
-                const selectionMode = ref(false);
-                const selectedRecordIds = ref([]);
-                const statusMessage = ref("");
-                const statusTone = ref("");
-                const topConfirm = reactive({ visible: false, title: "", message: "", confirmText: "確認", cancelText: "取消", tone: "danger" });
-                const topNotice = reactive({ visible: false, title: "提醒", message: "", tone: "warn" });
-                const editorForm = reactive(createEmptyForm());
-                const editorErrors = reactive({ name: false });
-                const editorSnapshot = ref("");
-                const cityOptions = Object.keys(DISTRICTS);
-                let confirmResolver = null;
-                let noticeTimer = 0;
-
-                const districtOptions = computed(() => editorForm.city ? DISTRICTS[editorForm.city] ?? [] : []);
-                const filteredRecords = computed(() => {
-                    const query = searchQuery.value.trim().toLowerCase();
-                    if (!query) return [...state.records];
-                    return state.records.filter((record) => [
-                        record.name,
-                        record.deliveryDate,
-                        formatDeliveryDate(record.deliveryDate),
-                        record.item,
-                        `${record.city}${record.district}`,
-                        `${record.city} ${record.district}`,
-                        record.shipping.join(" "),
-                        record.note
-                    ].join("\n").toLowerCase().includes(query));
-                });
-                const resultsMeta = computed(() => {
-                    if (!state.records.length) return "尚未建立任何紀錄";
-                    if (!filteredRecords.value.length) return `搜尋不到符合條件的資料，目前總共有 ${state.records.length} 筆紀錄`;
-                    return `共顯示 ${filteredRecords.value.length} / ${state.records.length} 筆紀錄`;
-                });
-                const allVisibleSelected = computed(() => Boolean(filteredRecords.value.length) && filteredRecords.value.every((record) => selectedRecordIds.value.includes(record.id)));
-
-                watch(() => editorForm.city, (city) => {
-                    if (!city || !(DISTRICTS[city] ?? []).includes(editorForm.district)) editorForm.district = "";
-                });
-
-                watch(() => editorForm.name, (name) => {
-                    if (name.trim()) editorErrors.name = false;
-                });
-
-                function createEmptyForm() {
-                    return { name: "", deliveryDate: "", item: "", city: "", district: "", shipping: [], note: "" };
-                }
-
-                function setStatus(message, tone = "") {
-                    statusMessage.value = message;
-                    statusTone.value = tone;
-                }
-
-                function resetEditorErrors() {
-                    editorErrors.name = false;
-                }
-
-                function showTopNotice(message, tone = "warn", title = "提醒") {
-                    window.clearTimeout(noticeTimer);
-                    topNotice.title = title;
-                    topNotice.message = message;
-                    topNotice.tone = tone;
-                    topNotice.visible = true;
-                    noticeTimer = window.setTimeout(() => {
-                        topNotice.visible = false;
-                    }, 3200);
-                }
-
-                function requestTopConfirm({ title = "請確認", message, confirmText = "確認", cancelText = "取消", tone = "danger" }) {
-                    if (confirmResolver) confirmResolver(false);
-                    topConfirm.title = title;
-                    topConfirm.message = message;
-                    topConfirm.confirmText = confirmText;
-                    topConfirm.cancelText = cancelText;
-                    topConfirm.tone = tone;
-                    topConfirm.visible = true;
-                    nextTick(() => document.querySelector("[data-top-confirm-button]")?.focus());
-                    return new Promise((resolve) => {
-                        confirmResolver = resolve;
-                    });
-                }
-
-                function resolveTopConfirm(accepted) {
-                    if (!topConfirm.visible) return;
-                    topConfirm.visible = false;
-                    const resolver = confirmResolver;
-                    confirmResolver = null;
-                    resolver?.(accepted);
-                }
-
-                function formSnapshot() {
-                    return JSON.stringify({ ...editorForm, shipping: [...editorForm.shipping].sort() });
-                }
-
-                function fillEditor(record = null) {
-                    resetEditorErrors();
-                    Object.assign(editorForm, createEmptyForm(), record ? {
-                        name: record.name,
-                        deliveryDate: record.deliveryDate,
-                        item: record.item,
-                        city: record.city,
-                        district: record.district,
-                        shipping: [...record.shipping],
-                        note: record.note
-                    } : {});
-                    editorSnapshot.value = formSnapshot();
-                }
-
-                async function discardEditor(force = false) {
-                    if (!force && (isCreating.value || editingId.value) && formSnapshot() !== editorSnapshot.value) {
-                        const accepted = await requestTopConfirm({
-                            title: "放棄未儲存內容？",
-                            message: "目前有尚未儲存的內容，確定要放棄嗎？",
-                            confirmText: "放棄",
-                            tone: "danger"
-                        });
-                        if (!accepted) return false;
-                    }
-                    isCreating.value = false;
-                    editingId.value = null;
-                    fillEditor(null);
-                    editorSnapshot.value = "";
-                    return true;
-                }
-
-                function focusEditor() {
-                    nextTick(() => document.querySelector("[data-editor-autofocus]")?.focus());
-                }
-
-                async function startCreate() {
-                    if (!await discardEditor()) return;
-                    cancelSelectionMode();
-                    fillEditor(null);
-                    isCreating.value = true;
-                    focusEditor();
-                }
-
-                async function startEdit(record) {
-                    if (!await discardEditor()) return;
-                    cancelSelectionMode();
-                    fillEditor(record);
-                    editingId.value = record.id;
-                    focusEditor();
-                }
-
-                async function cancelEditor() {
-                    await discardEditor();
-                }
-
-                function validateEditor() {
-                    if (!editorForm.name.trim()) {
-                        editorErrors.name = true;
-                        focusEditor();
-                        return false;
-                    }
-                    resetEditorErrors();
-                    return true;
-                }
-
-                function sortRecords() {
-                    state.records.sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt));
-                }
-
-                function persistLocalState() {
-                    localStorage.setItem(STORAGE_KEY, JSON.stringify({ shippingOptions: state.shippingOptions, records: state.records }));
-                }
-
-                async function persistAfterChange(message) {
-                    persistLocalState();
-                    if (!fileHandle.value || !supportsFileSystemAccess()) {
-                        setStatus(`${message}，已存在瀏覽器暫存。`, "warn");
-                        return;
-                    }
-                    try {
-                        const granted = await verifyFilePermission(fileHandle.value, true);
-                        if (!granted) return setStatus(`${message}，桌面檔案尚未授權寫入。`, "warn");
-                        await writeToDataFile(fileHandle.value, state);
-                        setStatus(`${message}，已儲存 JSON。`);
-                    } catch (error) {
-                        console.error(error);
-                        setStatus(`${message}，但儲存 JSON 失敗。`, "error");
-                    }
-                }
-
-                async function submitEditor() {
-                    if (!validateEditor()) return;
-                    const now = new Date().toISOString();
-                    const payload = {
-                        name: editorForm.name.trim(),
-                        deliveryDate: editorForm.deliveryDate,
-                        item: editorForm.item.trim(),
-                        city: editorForm.city,
-                        district: editorForm.district,
-                        shipping: uniqueTrimmedList(editorForm.shipping),
-                        note: editorForm.note.trim()
-                    };
-                    if (editingId.value) {
-                        const index = state.records.findIndex((record) => record.id === editingId.value);
-                        if (index !== -1) state.records[index] = { ...state.records[index], ...payload, updatedAt: now };
-                        sortRecords();
-                        discardEditor(true);
-                        await persistAfterChange("已更新紀錄");
-                        return;
-                    }
-                    state.records.unshift({ id: createId(), ...payload, createdAt: now, updatedAt: now });
-                    sortRecords();
-                    discardEditor(true);
-                    await persistAfterChange("已新增紀錄");
-                }
-
-                async function deleteRecord(id) {
-                    const record = state.records.find((item) => item.id === id);
-                    if (!record) return;
-                    const accepted = await requestTopConfirm({
-                        title: "刪除這筆紀錄？",
-                        message: `確定要刪除「${record.name}」這筆紀錄嗎？`,
-                        confirmText: "刪除",
-                        tone: "danger"
-                    });
-                    if (!accepted) return;
-                    state.records = state.records.filter((item) => item.id !== id);
-                    selectedRecordIds.value = selectedRecordIds.value.filter((recordId) => recordId !== id);
-                    if (editingId.value === id) await discardEditor(true);
-                    await persistAfterChange("已刪除紀錄");
-                }
-
-                async function startSelectionMode() {
-                    if (!state.records.length || !await discardEditor()) return;
-                    isCreating.value = false;
-                    selectedRecordIds.value = [];
-                    selectionMode.value = true;
-                }
-
-                function cancelSelectionMode() {
-                    selectionMode.value = false;
-                    selectedRecordIds.value = [];
-                }
-
-                function isRecordSelected(id) {
-                    return selectedRecordIds.value.includes(id);
-                }
-
-                function toggleRecordSelection(id) {
-                    selectedRecordIds.value = isRecordSelected(id)
-                        ? selectedRecordIds.value.filter((recordId) => recordId !== id)
-                        : [...selectedRecordIds.value, id];
-                }
-
-                function toggleRecordSelectionFromCard(id) {
-                    if (!selectionMode.value) return;
-                    toggleRecordSelection(id);
-                }
-
-                function toggleSelectAllVisible() {
-                    const visibleIds = filteredRecords.value.map((record) => record.id);
-                    if (!visibleIds.length) return;
-                    if (allVisibleSelected.value) {
-                        selectedRecordIds.value = selectedRecordIds.value.filter((id) => !visibleIds.includes(id));
-                        return;
-                    }
-                    selectedRecordIds.value = [...new Set([...selectedRecordIds.value, ...visibleIds])];
-                }
-
-                async function deleteSelectedRecords() {
-                    const selectedIds = [...selectedRecordIds.value];
-                    if (!selectedIds.length) return;
-                    const accepted = await requestTopConfirm({
-                        title: "刪除選取紀錄？",
-                        message: `確定要刪除已選取的 ${selectedIds.length} 筆紀錄嗎？`,
-                        confirmText: "刪除選取",
-                        tone: "danger"
-                    });
-                    if (!accepted) return;
-                    const selectedSet = new Set(selectedIds);
-                    state.records = state.records.filter((record) => !selectedSet.has(record.id));
-                    if (selectedSet.has(editingId.value)) await discardEditor(true);
-                    cancelSelectionMode();
-                    await persistAfterChange(`已刪除 ${selectedIds.length} 筆紀錄`);
-                }
-
-                async function clearAllRecords() {
-                    if (!state.records.length) return;
-                    const accepted = await requestTopConfirm({
-                        title: "清空全部紀錄？",
-                        message: "確定要清空全部紀錄嗎？",
-                        confirmText: "清空全部",
-                        tone: "danger"
-                    });
-                    if (!accepted) return;
-                    state.records = [];
-                    await discardEditor(true);
-                    cancelSelectionMode();
-                    closeSettings();
-                    await persistAfterChange("已清空全部紀錄");
-                }
-
-                function clearSearch() {
-                    searchQuery.value = "";
-                }
-
-                function openSettings() {
-                    showSettings.value = true;
-                }
-
-                function closeSettings() {
-                    showSettings.value = false;
-                }
-
-                async function addShippingOption() {
-                    const value = newShippingOption.value.trim();
-                    if (!value) return;
-                    if (state.shippingOptions.includes(value)) return showTopNotice("這個送貨方式已經存在。", "warn");
-                    state.shippingOptions.push(value);
-                    state.shippingOptions.sort((a, b) => a.localeCompare(b, "zh-Hant"));
-                    newShippingOption.value = "";
-                    await persistAfterChange("已新增送貨方式");
-                }
-
-                function startRenameShippingOption(option) {
-                    editingShippingOption.value = option;
-                    shippingOptionDraft.value = option;
-                    nextTick(() => document.querySelector("[data-shipping-edit-input]")?.focus());
-                }
-
-                function cancelShippingOptionRename() {
-                    editingShippingOption.value = "";
-                    shippingOptionDraft.value = "";
-                }
-
-                async function saveShippingOptionRename(option) {
-                    const value = shippingOptionDraft.value.trim();
-                    if (!value) return showTopNotice("請先填寫送貨方式名稱。", "warn");
-                    if (value === option) return cancelShippingOptionRename();
-                    if (state.shippingOptions.includes(value)) return showTopNotice("這個送貨方式已經存在。", "warn");
-                    state.shippingOptions = state.shippingOptions.map((item) => item === option ? value : item).sort((a, b) => a.localeCompare(b, "zh-Hant"));
-                    state.records = state.records.map((record) => record.shipping.includes(option)
-                        ? { ...record, shipping: record.shipping.map((item) => item === option ? value : item), updatedAt: new Date().toISOString() }
-                        : record);
-                    editorForm.shipping = editorForm.shipping.map((item) => item === option ? value : item);
-                    cancelShippingOptionRename();
-                    sortRecords();
-                    await persistAfterChange("已修改送貨方式");
-                }
-
-                async function deleteShippingOption(option) {
-                    const isUsed = state.records.some((record) => record.shipping.includes(option));
-                    const message = isUsed ? `「${option}」已被既有紀錄使用，刪除後會一併移除。確定刪除嗎？` : `確定要刪除「${option}」嗎？`;
-                    const accepted = await requestTopConfirm({
-                        title: "刪除送貨方式？",
-                        message,
-                        confirmText: "刪除",
-                        tone: "danger"
-                    });
-                    if (!accepted) return;
-                    state.shippingOptions = state.shippingOptions.filter((item) => item !== option);
-                    state.records = state.records.map((record) => record.shipping.includes(option)
-                        ? { ...record, shipping: record.shipping.filter((item) => item !== option), updatedAt: new Date().toISOString() }
-                        : record);
-                    editorForm.shipping = editorForm.shipping.filter((item) => item !== option);
-                    if (editingShippingOption.value === option) cancelShippingOptionRename();
-                    sortRecords();
-                    await persistAfterChange("已刪除送貨方式");
-                }
-
-                async function manualSave() {
-                    if (!supportsFileSystemAccess()) return exportJsonFile();
-                    if (!fileHandle.value) return saveAsDataFile();
-                    await writeToDataFile(fileHandle.value, state);
-                    setStatus("已儲存 JSON。");
-                }
-
-                async function openDataFile() {
-                    if (!supportsFileSystemAccess()) return showTopNotice("目前瀏覽器不支援直接開啟 JSON，請改用下載副本備份資料。", "warn");
-                    if (!await discardEditor()) return;
-                    try {
-                        const [handle] = await window.showOpenFilePicker({ multiple: false, types: [{ description: "JSON", accept: { "application/json": [".json"] } }] });
-                        if (!await verifyFilePermission(handle, false)) return setStatus("未取得 JSON 讀取權限。", "warn");
-                        const next = normalizeState(await readDataFile(handle));
-                        state.shippingOptions = next.shippingOptions;
-                        state.records = next.records;
-                        fileHandle.value = handle;
-                        await storeFileHandle(handle);
-                        persistLocalState();
-                        setStatus("已載入 JSON。");
-                    } catch (error) {
-                        if (error?.name !== "AbortError") setStatus("開啟 JSON 失敗。", "error");
-                    }
-                }
-
-                async function saveAsDataFile() {
-                    if (!supportsFileSystemAccess()) return exportJsonFile();
-                    try {
-                        const handle = await window.showSaveFilePicker({ suggestedName: "quicknote-data.json", types: [{ description: "JSON", accept: { "application/json": [".json"] } }] });
-                        if (!await verifyFilePermission(handle, true)) return setStatus("未取得 JSON 寫入權限。", "warn");
-                        fileHandle.value = handle;
-                        await storeFileHandle(handle);
-                        await writeToDataFile(handle, state);
-                        setStatus("已儲存 JSON。");
-                    } catch (error) {
-                        if (error?.name !== "AbortError") setStatus("儲存 JSON 失敗。", "error");
-                    }
-                }
-
-                function exportJsonFile() {
-                    const blob = new Blob([JSON.stringify({ shippingOptions: state.shippingOptions, records: state.records }, null, 2)], { type: "application/json" });
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement("a");
-                    link.href = url;
-                    link.download = `quicknote-export-${new Date().toISOString().slice(0, 10)}.json`;
-                    document.body.append(link);
-                    link.click();
-                    link.remove();
-                    URL.revokeObjectURL(url);
-                    setStatus("已下載 JSON 副本。");
-                }
-
-                function openImportDialog() {
-                    importInput.value?.click();
-                }
-
-                async function importJsonFile(event) {
-                    const file = event.target.files?.[0];
-                    if (!file || !await discardEditor()) return;
-                    try {
-                        const next = normalizeState(JSON.parse(await file.text()));
-                        state.shippingOptions = next.shippingOptions;
-                        state.records = next.records;
-                        persistLocalState();
-                        await persistAfterChange("已匯入 JSON");
-                    } catch {
-                        showTopNotice("匯入失敗，請確認 JSON 格式是否正確。", "error", "匯入失敗");
-                    } finally {
-                        event.target.value = "";
-                    }
-                }
-
-                nextTick(async () => {
-                    if (!supportsFileSystemAccess()) return;
-                    const handle = await getStoredFileHandle();
-                    if (!handle || !await verifyFilePermission(handle, false)) return;
-                    try {
-                        const next = normalizeState(await readDataFile(handle));
-                        state.shippingOptions = next.shippingOptions;
-                        state.records = next.records;
-                        fileHandle.value = handle;
-                        persistLocalState();
-                    } catch {
-                        setStatus("自動讀取上次 JSON 失敗。", "warn");
-                    }
-                });
-
-                return {
-                    state,
-                    searchQuery,
-                    showSettings,
-                    newShippingOption,
-                    editingShippingOption,
-                    shippingOptionDraft,
-                    importInput,
-                    editingId,
-                    isCreating,
-                    selectionMode,
-                    selectedRecordIds,
-                    statusMessage,
-                    statusTone,
-                    topConfirm,
-                    topNotice,
-                    editorForm,
-                    editorErrors,
-                    cityOptions,
-                    districtOptions,
-                    filteredRecords,
-                    resultsMeta,
-                    allVisibleSelected,
-                    startCreate,
-                    startEdit,
-                    cancelEditor,
-                    submitEditor,
-                    deleteRecord,
-                    startSelectionMode,
-                    cancelSelectionMode,
-                    isRecordSelected,
-                    toggleRecordSelection,
-                    toggleRecordSelectionFromCard,
-                    toggleSelectAllVisible,
-                    deleteSelectedRecords,
-                    resolveTopConfirm,
-                    clearAllRecords,
-                    clearSearch,
-                    openSettings,
-                    closeSettings,
-                    addShippingOption,
-                    startRenameShippingOption,
-                    cancelShippingOptionRename,
-                    saveShippingOptionRename,
-                    deleteShippingOption,
-                    manualSave,
-                    openDataFile,
-                    saveAsDataFile,
-                    exportJsonFile,
-                    openImportDialog,
-                    importJsonFile,
-                    formatDateTime,
-                    formatDeliveryDate,
-                    hasUpdated
-                };
-            }
-        });
-
-        app.component("record-editor", {
-            template: "#record-editor-template",
-            props: {
-                form: { type: Object, required: true },
-                errors: { type: Object, required: true },
-                cityOptions: { type: Array, required: true },
-                districtOptions: { type: Array, required: true },
-                shippingOptions: { type: Array, required: true },
-                mode: { type: String, required: true }
-            },
-            emits: ["save", "cancel", "delete"]
-        });
-
-        app.use(VCalendar.default, { componentPrefix: "V" });
-
-        app.mount("#app");
-    </script>
-</body>
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+		<title>QuickNote 客戶備忘錄</title>
+		<style>
+			:root {
+				color-scheme: light;
+				--page: #f4eadb;
+				--panel: rgba(255, 253, 249, 0.94);
+				--panel-strong: #fffdfa;
+				--muted: #f4ece0;
+				--text: #2d241e;
+				--text-soft: #6b5a4e;
+				--primary: #a24d24;
+				--primary-dark: #783617;
+				--secondary: #2f766f;
+				--secondary-soft: #dcece7;
+				--danger: #a73535;
+				--danger-soft: #f8d8d8;
+				--warning-soft: #f7dfdd;
+				--border: rgba(92, 70, 55, 0.18);
+				--shadow: 0 24px 54px rgba(86, 56, 34, 0.12);
+				--radius-xl: 24px;
+				--radius-lg: 18px;
+				--radius-md: 14px;
+				--space-1: 0.5rem;
+				--space-2: 0.75rem;
+				--space-3: 1rem;
+				--space-4: 1.25rem;
+				--space-5: 1.5rem;
+			}
+
+			* {
+				box-sizing: border-box;
+			}
+
+			html,
+			body {
+				margin: 0;
+				min-height: 100%;
+			}
+
+			body {
+				font-family:
+					"Noto Sans TC", "Microsoft JhengHei", "Segoe UI", sans-serif;
+				color: var(--text);
+				background:
+					radial-gradient(
+						circle at top left,
+						rgba(255, 216, 172, 0.88),
+						transparent 34%
+					),
+					radial-gradient(
+						circle at top right,
+						rgba(179, 223, 209, 0.72),
+						transparent 34%
+					),
+					linear-gradient(180deg, #fbf1e5 0%, var(--page) 100%);
+				padding: clamp(0.75rem, 2vw, 1.5rem);
+			}
+
+			button,
+			input,
+			select,
+			textarea {
+				font: inherit;
+			}
+
+			button {
+				cursor: pointer;
+			}
+
+			[v-cloak] {
+				display: none;
+			}
+
+			.shell {
+				width: min(1060px, 100%);
+				margin: 0 auto;
+				display: grid;
+				gap: var(--space-3);
+				transition: padding-top 180ms ease;
+			}
+
+			.shell.has-top-message {
+				padding-top: 7.25rem;
+			}
+
+			.panel {
+				background: var(--panel);
+				border: 1px solid var(--border);
+				border-radius: var(--radius-xl);
+				box-shadow: var(--shadow);
+				padding: clamp(1rem, 2.4vw, 1.55rem);
+				display: grid;
+				gap: var(--space-4);
+			}
+
+			.top-message-stack {
+				position: fixed;
+				top: clamp(0.75rem, 2vw, 1.5rem);
+				left: 50%;
+				z-index: 50;
+				width: min(520px, calc(100% - 1.5rem));
+				display: grid;
+				gap: var(--space-2);
+				transform: translateX(-50%);
+			}
+
+			.top-confirm,
+			.top-notice {
+				border: 1px solid rgba(92, 70, 55, 0.16);
+				border-radius: var(--radius-lg);
+				background: rgba(255, 253, 249, 0.98);
+				box-shadow: 0 14px 34px rgba(86, 56, 34, 0.14);
+				padding: 1.25rem 1.35rem;
+			}
+
+			.top-confirm {
+				position: relative;
+				overflow: hidden;
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: var(--space-3);
+			}
+
+			.top-confirm::before {
+				content: "";
+				position: absolute;
+				inset: 0 auto 0 0;
+				width: 0.45rem;
+				background: var(--primary);
+			}
+
+			.top-confirm.danger {
+				border-color: rgba(167, 53, 53, 0.36);
+				background: rgba(255, 253, 249, 0.98);
+				box-shadow:
+					0 16px 38px rgba(86, 56, 34, 0.16),
+					0 0 0 1px rgba(167, 53, 53, 0.06);
+			}
+
+			.top-confirm.danger::before {
+				background: var(--danger);
+			}
+
+			.top-confirm.danger .top-message-content strong {
+				color: var(--danger);
+			}
+
+			.top-confirm.danger .top-message-content p {
+				color: var(--text);
+			}
+
+			.top-confirm.danger .danger-button {
+				color: #fff;
+				background: linear-gradient(135deg, #b83232, var(--danger));
+				box-shadow: 0 10px 20px rgba(167, 53, 53, 0.22);
+			}
+
+			.top-notice.warn {
+				border-color: rgba(162, 77, 36, 0.28);
+			}
+
+			.top-notice.error {
+				border-color: rgba(167, 53, 53, 0.28);
+			}
+
+			.top-message-content {
+				display: grid;
+				gap: 0.45rem;
+			}
+
+			.top-message-content strong {
+				font-size: 1rem;
+			}
+
+			.top-message-content p {
+				color: var(--text-soft);
+				line-height: 1.6;
+			}
+
+			.top-confirm-actions {
+				display: flex;
+				align-items: center;
+				gap: var(--space-2);
+				flex-wrap: wrap;
+			}
+
+			.panel-header {
+				display: flex;
+				align-items: flex-start;
+				justify-content: space-between;
+				gap: var(--space-4);
+			}
+
+			h1,
+			h2,
+			h3,
+			p {
+				margin: 0;
+			}
+
+			h1 {
+				font-size: clamp(1.55rem, 4vw, 2rem);
+				line-height: 1.2;
+			}
+
+			.results-meta,
+			.hint,
+			.record-title small {
+				color: var(--text-soft);
+			}
+
+			.toolbar {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				gap: var(--space-3);
+				flex-wrap: wrap;
+			}
+
+			.toolbar-group,
+			.toolbar-side,
+			.record-actions,
+			.record-meta {
+				display: flex;
+				align-items: center;
+				gap: var(--space-2);
+				flex-wrap: wrap;
+			}
+
+			.toolbar-side {
+				justify-content: flex-end;
+			}
+
+			.button,
+			.ghost-button,
+			.danger-button,
+			.icon-button {
+				min-height: 44px;
+				border: 0;
+				border-radius: 999px;
+				padding: 0.75rem 1.15rem;
+				font-weight: 700;
+				color: var(--text);
+				transition:
+					transform 160ms ease,
+					box-shadow 160ms ease,
+					background 160ms ease;
+			}
+
+			.button:disabled,
+			.ghost-button:disabled,
+			.danger-button:disabled,
+			.icon-button:disabled {
+				cursor: not-allowed;
+				opacity: 0.52;
+				transform: none;
+			}
+
+			.button {
+				color: #fff;
+				background: linear-gradient(
+					135deg,
+					var(--primary),
+					var(--primary-dark)
+				);
+				box-shadow: 0 14px 28px rgba(120, 54, 23, 0.18);
+			}
+
+			.ghost-button {
+				background: rgba(255, 255, 255, 0.72);
+				border: 1px solid rgba(91, 70, 55, 0.16);
+			}
+
+			.danger-button {
+				color: var(--danger);
+				background: var(--danger-soft);
+			}
+
+			.icon-button {
+				width: 52px;
+				min-width: 52px;
+				padding: 0;
+				color: var(--secondary);
+				background: rgba(47, 118, 111, 0.12);
+				display: inline-grid;
+				place-items: center;
+			}
+
+			.button:hover,
+			.ghost-button:hover,
+			.danger-button:hover,
+			.icon-button:hover {
+				transform: translateY(-1px);
+			}
+
+			.button:focus-visible,
+			.ghost-button:focus-visible,
+			.danger-button:focus-visible,
+			.icon-button:focus-visible,
+			input:focus,
+			select:focus,
+			textarea:focus {
+				outline: 3px solid rgba(47, 118, 111, 0.22);
+				outline-offset: 2px;
+			}
+
+			.icon-button svg {
+				width: 1.2rem;
+				height: 1.2rem;
+				stroke: currentColor;
+				fill: none;
+				stroke-width: 1.9;
+				stroke-linecap: round;
+				stroke-linejoin: round;
+			}
+
+			.status-pill {
+				min-height: 44px;
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				border-radius: 999px;
+				padding: 0.72rem 1rem;
+				color: var(--secondary);
+				background: var(--secondary-soft);
+				font-weight: 700;
+			}
+
+			.status-pill.warn {
+				color: #9a3838;
+				background: var(--warning-soft);
+			}
+
+			.status-pill.error {
+				color: var(--danger);
+				background: var(--danger-soft);
+			}
+
+			.search-input,
+			.field input,
+			.field select,
+			.field textarea,
+			.settings-edit-form input {
+				width: 100%;
+				min-height: 3rem;
+				border: 1px solid rgba(92, 70, 55, 0.16);
+				border-radius: var(--radius-md);
+				background: var(--panel-strong);
+				color: var(--text);
+				padding: 0.85rem 1rem;
+			}
+
+			.date-input-wrap {
+				position: relative;
+			}
+
+			.date-input-icon {
+				position: absolute;
+				top: 50%;
+				right: 1rem;
+				width: 1.1rem;
+				height: 1.1rem;
+				transform: translateY(-50%);
+				color: var(--text-soft);
+				stroke: currentColor;
+				fill: none;
+				stroke-width: 1.9;
+				stroke-linecap: round;
+				stroke-linejoin: round;
+				pointer-events: none;
+			}
+
+			.field .date-input {
+				cursor: pointer;
+				padding-right: 3rem;
+			}
+
+			.vc-container {
+				--vc-font-family:
+					"Noto Sans TC", "Microsoft JhengHei", "Segoe UI", sans-serif;
+				--vc-accent-50: #f8eee8;
+				--vc-accent-100: #f1dfd3;
+				--vc-accent-200: #e7c4ae;
+				--vc-accent-300: #dba381;
+				--vc-accent-400: #c67848;
+				--vc-accent-500: var(--primary);
+				--vc-accent-600: var(--primary-dark);
+				--vc-accent-700: #612a11;
+				border-color: rgba(92, 70, 55, 0.16);
+				border-radius: var(--radius-lg);
+				box-shadow: 0 18px 42px rgba(86, 56, 34, 0.16);
+			}
+
+			.vc-popover-content {
+				border-radius: var(--radius-lg);
+			}
+
+			.search-input {
+				min-height: 3.35rem;
+			}
+
+			textarea {
+				resize: vertical;
+				min-height: 7rem;
+			}
+
+			.records-grid {
+				display: grid;
+				gap: var(--space-3);
+			}
+
+			.record-card,
+			.empty-state {
+				border: 1px solid rgba(162, 77, 36, 0.16);
+				border-radius: var(--radius-lg);
+				background: linear-gradient(
+					180deg,
+					rgba(255, 255, 255, 0.88),
+					rgba(255, 250, 244, 0.94)
+				);
+			}
+
+			.record-card {
+				display: grid;
+				gap: var(--space-3);
+				padding: var(--space-4);
+			}
+
+			.record-card.editing {
+				border-color: rgba(47, 118, 111, 0.3);
+				background: linear-gradient(
+					180deg,
+					rgba(250, 255, 253, 0.96),
+					rgba(244, 252, 249, 0.94)
+				);
+			}
+
+			.record-card.selected {
+				border-color: rgba(47, 118, 111, 0.42);
+				box-shadow: 0 18px 36px rgba(47, 118, 111, 0.12);
+			}
+
+			.record-card.selectable {
+				cursor: pointer;
+			}
+
+			.record-card.selectable:hover {
+				border-color: rgba(47, 118, 111, 0.34);
+				transform: translateY(-1px);
+			}
+
+			.record-card.selectable:focus-visible {
+				outline: 3px solid rgba(47, 118, 111, 0.28);
+				outline-offset: 3px;
+			}
+
+			.record-top {
+				display: flex;
+				align-items: flex-start;
+				justify-content: space-between;
+				gap: var(--space-3);
+				flex-wrap: wrap;
+			}
+
+			.record-title {
+				display: grid;
+				gap: 0.35rem;
+			}
+
+			.copy-field {
+				position: relative;
+				max-width: 100%;
+				display: inline-flex;
+				align-items: flex-start;
+				gap: 0.45rem;
+			}
+
+			.copy-field.block {
+				display: block;
+				width: 100%;
+			}
+
+			.copy-field.chip {
+				align-items: center;
+			}
+
+			.copy-button {
+				min-width: 0;
+				min-height: 0;
+				height: 1.9rem;
+				padding: 0 0.58rem;
+				border: 1px solid rgba(92, 70, 55, 0.16);
+				border-radius: 999px;
+				background: rgba(255, 253, 249, 0.96);
+				box-shadow: 0 8px 18px rgba(86, 56, 34, 0.1);
+				color: var(--text-soft);
+				font-size: 0.76rem;
+				font-weight: 700;
+				opacity: 0;
+				pointer-events: none;
+				transform: translateY(2px);
+				transition:
+					opacity 160ms ease,
+					transform 160ms ease,
+					background 160ms ease,
+					color 160ms ease;
+			}
+
+			.copy-field:hover .copy-button,
+			.copy-field:focus-within .copy-button {
+				opacity: 1;
+				pointer-events: auto;
+				transform: translateY(0);
+			}
+
+			.copy-button:hover {
+				color: var(--primary);
+				background: #fff;
+			}
+
+			.copy-field.block .copy-button {
+				position: absolute;
+				top: 0.8rem;
+				right: 0.8rem;
+				z-index: 1;
+			}
+
+			.record-select-label {
+				min-height: 44px;
+				display: inline-flex;
+				align-items: center;
+				gap: 0.55rem;
+				color: var(--secondary);
+				font-weight: 800;
+			}
+
+			.record-select-label input {
+				width: 1.1rem;
+				height: 1.1rem;
+				accent-color: var(--secondary);
+			}
+
+			.selection-count {
+				min-height: 44px;
+				display: inline-flex;
+				align-items: center;
+				border-radius: 999px;
+				padding: 0.72rem 1rem;
+				color: var(--secondary);
+				background: var(--secondary-soft);
+				font-weight: 800;
+			}
+
+			.record-item,
+			.record-note {
+				border-radius: var(--radius-md);
+				padding: 1rem;
+				white-space: pre-wrap;
+				word-break: break-word;
+				line-height: 1.7;
+			}
+
+			.copy-field.block .record-item,
+			.copy-field.block .record-note {
+				padding-right: 3.6rem;
+			}
+
+			.record-item {
+				background: rgba(162, 77, 36, 0.08);
+				font-weight: 700;
+			}
+
+			.record-note {
+				background: var(--muted);
+				color: var(--text-soft);
+			}
+
+			.pill {
+				min-height: 36px;
+				display: inline-flex;
+				align-items: center;
+				border-radius: 999px;
+				padding: 0.38rem 0.8rem;
+				color: var(--secondary);
+				background: var(--secondary-soft);
+				font-weight: 700;
+			}
+
+			.pill.muted {
+				color: var(--text-soft);
+				background: rgba(91, 70, 55, 0.1);
+			}
+
+			.empty-state {
+				text-align: center;
+				display: grid;
+				gap: var(--space-2);
+				padding: clamp(2.5rem, 7vw, 4.2rem) var(--space-4);
+				border-style: dashed;
+			}
+
+			.editor-form {
+				display: grid;
+				gap: var(--space-3);
+			}
+
+			.form-grid {
+				display: grid;
+				gap: var(--space-3);
+			}
+
+			.form-grid.two {
+				grid-template-columns: repeat(2, minmax(0, 1fr));
+			}
+
+			.field {
+				display: grid;
+				gap: 0.45rem;
+			}
+
+			.field label,
+			.field legend {
+				font-weight: 700;
+			}
+
+			.field.invalid input {
+				border-color: rgba(167, 53, 53, 0.7);
+				background: #fff5f3;
+				box-shadow: 0 0 0 4px rgba(167, 53, 53, 0.1);
+			}
+
+			.field-error {
+				color: var(--danger);
+				font-size: 0.9rem;
+				font-weight: 700;
+			}
+
+			.required-mark {
+				color: var(--danger);
+				margin-left: 0.2rem;
+			}
+
+			fieldset.field {
+				border: 0;
+				padding: 0;
+				margin: 0;
+			}
+
+			.checkbox-group {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 0.65rem;
+			}
+
+			.checkbox-chip {
+				min-height: 44px;
+				display: inline-flex;
+				align-items: center;
+				gap: 0.5rem;
+				border: 1px solid rgba(162, 77, 36, 0.16);
+				border-radius: 999px;
+				background: rgba(255, 255, 255, 0.72);
+				padding: 0.68rem 0.9rem;
+			}
+
+			.checkbox-chip input {
+				width: 1rem;
+				height: 1rem;
+				accent-color: var(--secondary);
+			}
+
+			.overlay {
+				position: fixed;
+				inset: 0;
+				display: grid;
+				place-items: center;
+				padding: var(--space-3);
+				background: rgba(42, 29, 20, 0.42);
+				z-index: 10;
+			}
+
+			.modal {
+				width: min(720px, 100%);
+				max-height: min(820px, 92vh);
+				overflow: auto;
+				background: var(--panel-strong);
+				border: 1px solid var(--border);
+				border-radius: var(--radius-xl);
+				box-shadow: var(--shadow);
+				padding: var(--space-5);
+				display: grid;
+				gap: var(--space-4);
+			}
+
+			.settings-section {
+				display: grid;
+				gap: var(--space-3);
+			}
+
+			.settings-actions,
+			.settings-list {
+				display: grid;
+				gap: var(--space-2);
+			}
+
+			.settings-actions {
+				grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+			}
+
+			.settings-item {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: var(--space-2);
+				border: 1px solid rgba(92, 70, 55, 0.12);
+				border-radius: var(--radius-md);
+				background: rgba(247, 241, 234, 0.7);
+				padding: 0.75rem 0.9rem;
+			}
+
+			.settings-item-actions {
+				display: flex;
+				gap: var(--space-2);
+				flex-wrap: wrap;
+			}
+
+			.settings-edit-form {
+				width: 100%;
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) auto;
+				gap: var(--space-2);
+				align-items: center;
+			}
+
+			.inline-form {
+				display: grid;
+				grid-template-columns: minmax(0, 1fr) auto;
+				gap: var(--space-2);
+				align-items: end;
+			}
+
+			.visually-hidden {
+				position: absolute;
+				width: 1px;
+				height: 1px;
+				overflow: hidden;
+				clip: rect(0, 0, 0, 0);
+				white-space: nowrap;
+			}
+
+			@media (max-width: 760px) {
+				body {
+					padding: var(--space-2);
+				}
+
+				.copy-button {
+					opacity: 1;
+					pointer-events: auto;
+					transform: translateY(0);
+				}
+
+				.panel-header,
+				.toolbar,
+				.toolbar-side,
+				.record-top,
+				.settings-item {
+					flex-direction: column;
+					align-items: stretch;
+				}
+
+				.top-confirm {
+					align-items: stretch;
+					flex-direction: column;
+				}
+
+				.toolbar-group,
+				.toolbar-side,
+				.record-actions,
+				.settings-item-actions {
+					width: 100%;
+				}
+
+				.toolbar-group button,
+				.toolbar-side button,
+				.record-actions button,
+				.settings-actions button,
+				.inline-form button,
+				.settings-item-actions button,
+				.top-confirm-actions button {
+					width: 100%;
+				}
+
+				.status-pill {
+					width: 100%;
+				}
+
+				.form-grid.two,
+				.inline-form,
+				.settings-edit-form {
+					grid-template-columns: 1fr;
+				}
+
+				.record-card,
+				.panel,
+				.modal {
+					padding: var(--space-3);
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div id="app" v-cloak>
+			<div class="top-message-stack" aria-live="polite">
+				<section
+					v-if="topConfirm.visible"
+					class="top-confirm"
+					:class="topConfirm.tone"
+					role="dialog"
+					aria-labelledby="topConfirmTitle"
+				>
+					<div class="top-message-content">
+						<strong id="topConfirmTitle"
+							>{{ topConfirm.title }}</strong
+						>
+						<p>{{ topConfirm.message }}</p>
+					</div>
+					<div class="top-confirm-actions">
+						<button
+							class="danger-button"
+							type="button"
+							data-top-confirm-button
+							@click="resolveTopConfirm(true)"
+						>
+							{{ topConfirm.confirmText }}
+						</button>
+						<button
+							class="ghost-button"
+							type="button"
+							@click="resolveTopConfirm(false)"
+						>
+							{{ topConfirm.cancelText }}
+						</button>
+					</div>
+				</section>
+				<section
+					v-if="topNotice.visible"
+					class="top-notice"
+					:class="topNotice.tone"
+					role="status"
+				>
+					<div class="top-message-content">
+						<strong>{{ topNotice.title }}</strong>
+						<p>{{ topNotice.message }}</p>
+					</div>
+				</section>
+			</div>
+			<main
+				class="shell"
+				:class="{ 'has-top-message': topConfirm.visible || topNotice.visible }"
+			>
+				<section class="panel" aria-labelledby="recordsTitle">
+					<div class="panel-header">
+						<div>
+							<h1 id="recordsTitle">紀錄列表</h1>
+						</div>
+						<div class="results-meta">{{ resultsMeta }}</div>
+					</div>
+
+					<div class="toolbar">
+						<div class="toolbar-group">
+							<template v-if="selectionMode">
+								<span class="selection-count"
+									>已選 {{ selectedRecordIds.length }}
+									筆</span
+								>
+								<button
+									class="ghost-button"
+									type="button"
+									@click="toggleSelectAllVisible"
+									:disabled="!filteredRecords.length"
+								>
+									{{ allVisibleSelected ? '取消全選' :
+									'全選目前列表' }}
+								</button>
+								<button
+									class="danger-button"
+									type="button"
+									@click="deleteSelectedRecords"
+									:disabled="!selectedRecordIds.length"
+								>
+									刪除選取
+								</button>
+								<button
+									class="ghost-button"
+									type="button"
+									@click="cancelSelectionMode"
+								>
+									取消
+								</button>
+							</template>
+							<template v-else>
+								<button
+									class="button"
+									type="button"
+									@click="startCreate"
+								>
+									新增紀錄
+								</button>
+								<button
+									class="ghost-button"
+									type="button"
+									@click="clearSearch"
+								>
+									清除搜尋
+								</button>
+								<button
+									class="danger-button"
+									type="button"
+									@click="startSelectionMode"
+									:disabled="!state.records.length"
+								>
+									多選刪除
+								</button>
+							</template>
+						</div>
+						<div class="toolbar-side">
+							<button
+								class="icon-button"
+								type="button"
+								aria-label="設定"
+								@click="openSettings"
+							>
+								<svg viewBox="0 0 24 24" aria-hidden="true">
+									<circle cx="12" cy="12" r="3.2"></circle>
+									<path
+										d="M19.4 15a1 1 0 0 0 .2 1.1l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1 1 0 0 0-1.1-.2 1 1 0 0 0-.6.9V20a2 2 0 1 1-4 0v-.2a1 1 0 0 0-.6-.9 1 1 0 0 0-1.1.2l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1 1 0 0 0 .2-1.1 1 1 0 0 0-.9-.6H4a2 2 0 1 1 0-4h.2a1 1 0 0 0 .9-.6 1 1 0 0 0-.2-1.1l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1 1 0 0 0 1.1.2 1 1 0 0 0 .6-.9V4a2 2 0 1 1 4 0v.2a1 1 0 0 0 .6.9 1 1 0 0 0 1.1-.2l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1 1 0 0 0-.2 1.1 1 1 0 0 0 .9.6h.2a2 2 0 1 1 0 4h-.2a1 1 0 0 0-.9.6z"
+									></path>
+								</svg>
+							</button>
+						</div>
+					</div>
+
+					<label class="visually-hidden" for="searchInput"
+						>搜尋</label
+					>
+					<input
+						id="searchInput"
+						class="search-input"
+						v-model.trim="searchQuery"
+						type="search"
+						autocomplete="off"
+						placeholder="搜尋客戶名、日期、貨品、行政區、送貨方式或備註"
+					/>
+
+					<div class="records-grid">
+						<article v-if="isCreating" class="record-card editing">
+							<record-editor
+								:form="editorForm"
+								:errors="editorErrors"
+								:city-options="cityOptions"
+								:district-options="districtOptions"
+								:shipping-options="state.shippingOptions"
+								mode="create"
+								@save="submitEditor"
+								@cancel="cancelEditor"
+							></record-editor>
+						</article>
+
+						<article
+							v-for="record in filteredRecords"
+							:key="record.id"
+							class="record-card"
+							:class="{ editing: editingId === record.id, selected: isRecordSelected(record.id), selectable: selectionMode }"
+							:role="selectionMode ? 'checkbox' : null"
+							:aria-checked="selectionMode ? isRecordSelected(record.id) : null"
+							:tabindex="selectionMode ? 0 : null"
+							@click="toggleRecordSelectionFromCard(record.id)"
+							@keydown.enter.prevent="toggleRecordSelectionFromCard(record.id)"
+							@keydown.space.prevent="toggleRecordSelectionFromCard(record.id)"
+						>
+							<record-editor
+								v-if="editingId === record.id"
+								:form="editorForm"
+								:errors="editorErrors"
+								:city-options="cityOptions"
+								:district-options="districtOptions"
+								:shipping-options="state.shippingOptions"
+								mode="edit"
+								@save="submitEditor"
+								@cancel="cancelEditor"
+								@delete="deleteRecord(record.id)"
+							></record-editor>
+
+							<template v-else>
+								<div class="record-top">
+									<div
+										v-if="selectionMode"
+										class="record-select-label"
+									>
+										<input
+											type="checkbox"
+											:checked="isRecordSelected(record.id)"
+											tabindex="-1"
+											@click.prevent
+										/>
+										<span>選取</span>
+									</div>
+									<div class="record-title">
+										<div class="copy-field">
+											<h3>{{ record.name }}</h3>
+											<button
+												class="copy-button"
+												type="button"
+												aria-label="複製客戶名"
+												title="複製客戶名"
+												@click.stop="copyField(record.name, '客戶名')"
+												@keydown.enter.stop
+												@keydown.space.stop
+											>
+												複製
+											</button>
+										</div>
+										<div
+											v-if="record.city || record.district"
+											class="copy-field"
+										>
+											<small
+												>{{ record.city }}{{
+												record.district }}</small
+											>
+											<button
+												class="copy-button"
+												type="button"
+												aria-label="複製行政區"
+												title="複製行政區"
+												@click.stop="copyField(`${record.city}${record.district}`, '行政區')"
+												@keydown.enter.stop
+												@keydown.space.stop
+											>
+												複製
+											</button>
+										</div>
+									</div>
+									<div
+										v-if="!selectionMode"
+										class="record-actions"
+									>
+										<button
+											class="ghost-button"
+											type="button"
+											@click="startEdit(record)"
+										>
+											編輯
+										</button>
+										<button
+											class="danger-button"
+											type="button"
+											@click="deleteRecord(record.id)"
+										>
+											刪除
+										</button>
+									</div>
+								</div>
+								<div class="record-meta">
+									<div class="copy-field chip">
+										<span class="pill muted"
+											>出貨：{{ record.deliveryDate ?
+											formatDeliveryDate(record.deliveryDate)
+											: '未設定日期' }}</span
+										>
+										<button
+											class="copy-button"
+											type="button"
+											aria-label="複製出貨資訊"
+											title="複製出貨資訊"
+											@click.stop="copyField(`出貨：${record.deliveryDate ? formatDeliveryDate(record.deliveryDate) : '未設定日期'}`, '出貨資訊')"
+											@keydown.enter.stop
+											@keydown.space.stop
+										>
+											複製
+										</button>
+									</div>
+									<div
+										v-if="!record.shipping.length"
+										class="copy-field chip"
+									>
+										<span class="pill muted"
+											>未選擇送貨方式</span
+										>
+										<button
+											class="copy-button"
+											type="button"
+											aria-label="複製送貨方式"
+											title="複製送貨方式"
+											@click.stop="copyField('未選擇送貨方式', '送貨方式')"
+											@keydown.enter.stop
+											@keydown.space.stop
+										>
+											複製
+										</button>
+									</div>
+									<div
+										v-for="item in record.shipping"
+										:key="item"
+										class="copy-field chip"
+									>
+										<span class="pill">{{ item }}</span>
+										<button
+											class="copy-button"
+											type="button"
+											aria-label="複製送貨方式"
+											title="複製送貨方式"
+											@click.stop="copyField(item, '送貨方式')"
+											@keydown.enter.stop
+											@keydown.space.stop
+										>
+											複製
+										</button>
+									</div>
+								</div>
+								<div class="copy-field block">
+									<div class="record-item">
+										{{ record.item || '尚未填寫貨品內容' }}
+									</div>
+									<button
+										class="copy-button"
+										type="button"
+										aria-label="複製貨品內容"
+										title="複製貨品內容"
+										@click.stop="copyField(record.item || '尚未填寫貨品內容', '貨品內容')"
+										@keydown.enter.stop
+										@keydown.space.stop
+									>
+										複製
+									</button>
+								</div>
+								<div class="copy-field block">
+									<div class="record-note">
+										{{ record.note || '尚未填寫備註' }}
+									</div>
+									<button
+										class="copy-button"
+										type="button"
+										aria-label="複製備註"
+										title="複製備註"
+										@click.stop="copyField(record.note || '尚未填寫備註', '備註')"
+										@keydown.enter.stop
+										@keydown.space.stop
+									>
+										複製
+									</button>
+								</div>
+								<div class="record-meta">
+									<div class="copy-field chip">
+										<span class="pill muted"
+											>建立：{{
+											formatDateTime(record.createdAt)
+											}}</span
+										>
+										<button
+											class="copy-button"
+											type="button"
+											aria-label="複製建立時間"
+											title="複製建立時間"
+											@click.stop="copyField(`建立：${formatDateTime(record.createdAt)}`, '建立時間')"
+											@keydown.enter.stop
+											@keydown.space.stop
+										>
+											複製
+										</button>
+									</div>
+									<div
+										v-if="hasUpdated(record)"
+										class="copy-field chip"
+									>
+										<span class="pill muted"
+											>更新：{{
+											formatDateTime(record.updatedAt)
+											}}</span
+										>
+										<button
+											class="copy-button"
+											type="button"
+											aria-label="複製更新時間"
+											title="複製更新時間"
+											@click.stop="copyField(`更新：${formatDateTime(record.updatedAt)}`, '更新時間')"
+											@keydown.enter.stop
+											@keydown.space.stop
+										>
+											複製
+										</button>
+									</div>
+								</div>
+							</template>
+						</article>
+
+						<div
+							v-if="!isCreating && !filteredRecords.length"
+							class="empty-state"
+						>
+							<h3>
+								{{ state.records.length ? '找不到符合條件的資料'
+								: '還沒有客戶資料' }}
+							</h3>
+							<p>
+								{{ state.records.length ?
+								'可以換個關鍵字，或直接按新增紀錄插入一張新的空白卡片。'
+								:
+								'先按新增紀錄，列表最上方就會出現一張可直接輸入的空白卡片。'
+								}}
+							</p>
+						</div>
+					</div>
+				</section>
+			</main>
+
+			<div
+				v-if="showSettings"
+				class="overlay"
+				role="presentation"
+				@click.self="closeSettings"
+			>
+				<section
+					class="modal"
+					role="dialog"
+					aria-modal="true"
+					aria-labelledby="settingsTitle"
+				>
+					<div class="panel-header">
+						<div>
+							<h2 id="settingsTitle">設定</h2>
+						</div>
+						<button
+							class="ghost-button"
+							type="button"
+							@click="closeSettings"
+						>
+							關閉
+						</button>
+					</div>
+
+					<section
+						class="settings-section"
+						aria-labelledby="dataActionsTitle"
+					>
+						<div>
+							<h3 id="dataActionsTitle">資料操作</h3>
+						</div>
+						<div class="settings-actions">
+							<button
+								class="ghost-button"
+								type="button"
+								@click="openDataFile"
+							>
+								開啟 JSON
+							</button>
+							<button
+								class="button"
+								type="button"
+								@click="manualSave"
+							>
+								儲存 JSON
+							</button>
+							<button
+								class="ghost-button"
+								type="button"
+								@click="exportJsonFile"
+							>
+								下載副本
+							</button>
+							<button
+								class="danger-button"
+								type="button"
+								@click="clearAllRecords"
+							>
+								清空全部紀錄
+							</button>
+						</div>
+					</section>
+
+					<section
+						class="settings-section"
+						aria-labelledby="shippingSettingsTitle"
+					>
+						<div>
+							<h3 id="shippingSettingsTitle">送貨方式設定</h3>
+						</div>
+						<form
+							class="inline-form"
+							@submit.prevent="addShippingOption"
+						>
+							<div class="field">
+								<label for="shippingOptionInput"
+									>新增送貨方式</label
+								>
+								<input
+									id="shippingOptionInput"
+									v-model.trim="newShippingOption"
+									autocomplete="off"
+									placeholder="例如：黑貓宅配"
+								/>
+							</div>
+							<button class="button" type="submit">
+								新增選項
+							</button>
+						</form>
+						<div class="settings-list">
+							<div
+								v-if="!state.shippingOptions.length"
+								class="empty-state"
+							>
+								<h3>尚無送貨方式</h3>
+							</div>
+							<div
+								v-for="option in state.shippingOptions"
+								:key="option"
+								class="settings-item"
+							>
+								<form
+									v-if="editingShippingOption === option"
+									class="settings-edit-form"
+									@submit.prevent="saveShippingOptionRename(option)"
+								>
+									<input
+										data-shipping-edit-input
+										v-model.trim="shippingOptionDraft"
+										autocomplete="off"
+										aria-label="修改送貨方式名稱"
+									/>
+									<div class="settings-item-actions">
+										<button class="button" type="submit">
+											儲存
+										</button>
+										<button
+											class="ghost-button"
+											type="button"
+											@click="cancelShippingOptionRename"
+										>
+											取消
+										</button>
+									</div>
+								</form>
+								<template v-else>
+									<strong>{{ option }}</strong>
+									<div class="settings-item-actions">
+										<button
+											class="ghost-button"
+											type="button"
+											@click="startRenameShippingOption(option)"
+										>
+											改名
+										</button>
+										<button
+											class="danger-button"
+											type="button"
+											@click="deleteShippingOption(option)"
+										>
+											刪除
+										</button>
+									</div>
+								</template>
+							</div>
+						</div>
+					</section>
+				</section>
+			</div>
+
+			<input
+				ref="importInput"
+				type="file"
+				accept="application/json,.json"
+				hidden
+				@change="importJsonFile"
+			/>
+		</div>
+
+		<template id="record-editor-template">
+			<form
+				class="editor-form"
+				novalidate
+				@submit.prevent="$emit('save')"
+			>
+				<div class="record-top">
+					<div class="record-title">
+						<h3>
+							{{ mode === 'create' ? '新增紀錄' : '編輯紀錄' }}
+						</h3>
+						<small
+							>{{ mode === 'create' ?
+							'這張空白卡片就是新的輸入區塊。' :
+							'直接在原本位置修改。' }}</small
+						>
+					</div>
+					<div class="record-actions">
+						<button class="button" type="submit">
+							{{ mode === 'create' ? '儲存新增' : '儲存修改' }}
+						</button>
+						<button
+							class="ghost-button"
+							type="button"
+							@click="$emit('cancel')"
+						>
+							取消
+						</button>
+						<button
+							v-if="mode === 'edit'"
+							class="danger-button"
+							type="button"
+							@click="$emit('delete')"
+						>
+							刪除
+						</button>
+					</div>
+				</div>
+
+				<div class="form-grid two">
+					<div class="field" :class="{ invalid: errors.name }">
+						<label
+							>客戶名<span
+								class="required-mark"
+								aria-hidden="true"
+								>*</span
+							></label
+						>
+						<input
+							data-editor-autofocus
+							v-model.trim="form.name"
+							autocomplete="off"
+							placeholder="例如：王小姐"
+							aria-required="true"
+							:aria-invalid="errors.name ? 'true' : 'false'"
+							:aria-describedby="errors.name ? 'customerNameError' : null"
+						/>
+						<p
+							v-if="errors.name"
+							id="customerNameError"
+							class="field-error"
+						>
+							必填
+						</p>
+					</div>
+					<div class="field">
+						<label>出貨日期</label>
+						<v-date-picker
+							v-model.string="form.deliveryDate"
+							:masks="{ input: 'YYYY / MM / DD', modelValue: 'YYYY-MM-DD' }"
+							:popover="{ visibility: 'click', placement: 'bottom-start' }"
+						>
+							<template #default="{ inputValue, inputEvents }">
+								<div class="date-input-wrap">
+									<input
+										class="date-input"
+										:value="inputValue"
+										v-on="inputEvents"
+										readonly
+										placeholder="請選擇出貨日期"
+									/>
+									<svg
+										class="date-input-icon"
+										viewBox="0 0 24 24"
+										aria-hidden="true"
+									>
+										<path d="M8 2v4"></path>
+										<path d="M16 2v4"></path>
+										<path d="M3.5 9h17"></path>
+										<rect
+											x="4"
+											y="5"
+											width="16"
+											height="16"
+											rx="2"
+										></rect>
+									</svg>
+								</div>
+							</template>
+						</v-date-picker>
+					</div>
+				</div>
+
+				<div class="field">
+					<label>貨品內容</label>
+					<textarea
+						v-model.trim="form.item"
+						placeholder="例如：禮盒 2 組、常溫一箱"
+					></textarea>
+				</div>
+
+				<div class="form-grid two">
+					<div class="field">
+						<label>縣市</label>
+						<select v-model="form.city">
+							<option value="">請選擇縣市</option>
+							<option
+								v-for="city in cityOptions"
+								:key="city"
+								:value="city"
+							>
+								{{ city }}
+							</option>
+						</select>
+					</div>
+					<div class="field">
+						<label>行政區</label>
+						<select
+							v-model="form.district"
+							:disabled="!districtOptions.length"
+						>
+							<option value="">
+								{{ districtOptions.length ? '請選擇行政區' :
+								'請先選擇縣市' }}
+							</option>
+							<option
+								v-for="district in districtOptions"
+								:key="district"
+								:value="district"
+							>
+								{{ district }}
+							</option>
+						</select>
+					</div>
+				</div>
+
+				<fieldset class="field">
+					<legend>送貨方式</legend>
+					<div class="checkbox-group">
+						<label
+							v-for="option in shippingOptions"
+							:key="option"
+							class="checkbox-chip"
+						>
+							<input
+								v-model="form.shipping"
+								type="checkbox"
+								:value="option"
+							/>
+							<span>{{ option }}</span>
+						</label>
+					</div>
+					<p class="hint">送貨方式可到設定增減或改名。</p>
+				</fieldset>
+
+				<div class="field">
+					<label>備註</label>
+					<textarea
+						v-model.trim="form.note"
+						placeholder="例如：上午前送到比較方便。"
+					></textarea>
+				</div>
+			</form>
+		</template>
+
+		<script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+		<script src="https://unpkg.com/@popperjs/core@2.11.8/dist/umd/popper.min.js"></script>
+		<script>
+			window.PopperCore = window.Popper;
+		</script>
+		<script src="https://unpkg.com/v-calendar@3.1.2/dist/iife/index.js"></script>
+		<script>
+			const DISTRICTS = {
+				台北市: [
+					"中正區",
+					"大同區",
+					"中山區",
+					"松山區",
+					"大安區",
+					"萬華區",
+					"信義區",
+					"士林區",
+					"北投區",
+					"內湖區",
+					"南港區",
+					"文山區",
+				],
+				新北市: [
+					"板橋區",
+					"三重區",
+					"中和區",
+					"永和區",
+					"新莊區",
+					"新店區",
+					"樹林區",
+					"鶯歌區",
+					"三峽區",
+					"淡水區",
+					"汐止區",
+					"瑞芳區",
+					"土城區",
+					"蘆洲區",
+					"五股區",
+					"泰山區",
+					"林口區",
+					"深坑區",
+					"石碇區",
+					"坪林區",
+					"三芝區",
+					"石門區",
+					"八里區",
+					"平溪區",
+					"雙溪區",
+					"貢寮區",
+					"金山區",
+					"萬里區",
+					"烏來區",
+				],
+				桃園市: [
+					"桃園區",
+					"中壢區",
+					"平鎮區",
+					"八德區",
+					"楊梅區",
+					"蘆竹區",
+					"大溪區",
+					"龍潭區",
+					"龜山區",
+					"大園區",
+					"觀音區",
+					"新屋區",
+					"復興區",
+				],
+				台中市: [
+					"中區",
+					"東區",
+					"南區",
+					"西區",
+					"北區",
+					"西屯區",
+					"南屯區",
+					"北屯區",
+					"豐原區",
+					"東勢區",
+					"大甲區",
+					"清水區",
+					"沙鹿區",
+					"梧棲區",
+					"后里區",
+					"神岡區",
+					"潭子區",
+					"大雅區",
+					"新社區",
+					"石岡區",
+					"外埔區",
+					"大安區",
+					"烏日區",
+					"大肚區",
+					"龍井區",
+					"霧峰區",
+					"太平區",
+					"大里區",
+					"和平區",
+				],
+				台南市: [
+					"中西區",
+					"東區",
+					"南區",
+					"北區",
+					"安平區",
+					"安南區",
+					"永康區",
+					"歸仁區",
+					"新化區",
+					"左鎮區",
+					"玉井區",
+					"楠西區",
+					"南化區",
+					"仁德區",
+					"關廟區",
+					"龍崎區",
+					"官田區",
+					"麻豆區",
+					"佳里區",
+					"西港區",
+					"七股區",
+					"將軍區",
+					"學甲區",
+					"北門區",
+					"新營區",
+					"後壁區",
+					"白河區",
+					"東山區",
+					"六甲區",
+					"下營區",
+					"柳營區",
+					"鹽水區",
+					"善化區",
+					"大內區",
+					"山上區",
+					"新市區",
+					"安定區",
+				],
+				高雄市: [
+					"新興區",
+					"前金區",
+					"苓雅區",
+					"鹽埕區",
+					"鼓山區",
+					"旗津區",
+					"前鎮區",
+					"三民區",
+					"楠梓區",
+					"小港區",
+					"左營區",
+					"仁武區",
+					"大社區",
+					"岡山區",
+					"路竹區",
+					"阿蓮區",
+					"田寮區",
+					"燕巢區",
+					"橋頭區",
+					"梓官區",
+					"彌陀區",
+					"永安區",
+					"湖內區",
+					"鳳山區",
+					"大寮區",
+					"林園區",
+					"鳥松區",
+					"大樹區",
+					"旗山區",
+					"美濃區",
+					"六龜區",
+					"內門區",
+					"杉林區",
+					"甲仙區",
+					"桃源區",
+					"那瑪夏區",
+					"茂林區",
+					"茄萣區",
+				],
+				基隆市: [
+					"仁愛區",
+					"信義區",
+					"中正區",
+					"中山區",
+					"安樂區",
+					"暖暖區",
+					"七堵區",
+				],
+				新竹市: ["東區", "北區", "香山區"],
+				嘉義市: ["東區", "西區"],
+				新竹縣: [
+					"竹北市",
+					"湖口鄉",
+					"新豐鄉",
+					"新埔鎮",
+					"關西鎮",
+					"芎林鄉",
+					"寶山鄉",
+					"竹東鎮",
+					"五峰鄉",
+					"橫山鄉",
+					"尖石鄉",
+					"北埔鄉",
+					"峨眉鄉",
+				],
+				苗栗縣: [
+					"竹南鎮",
+					"頭份市",
+					"三灣鄉",
+					"南庄鄉",
+					"獅潭鄉",
+					"後龍鎮",
+					"通霄鎮",
+					"苑裡鎮",
+					"苗栗市",
+					"造橋鄉",
+					"頭屋鄉",
+					"公館鄉",
+					"大湖鄉",
+					"泰安鄉",
+					"銅鑼鄉",
+					"三義鄉",
+					"西湖鄉",
+					"卓蘭鎮",
+				],
+				彰化縣: [
+					"彰化市",
+					"芬園鄉",
+					"花壇鄉",
+					"秀水鄉",
+					"鹿港鎮",
+					"福興鄉",
+					"線西鄉",
+					"和美鎮",
+					"伸港鄉",
+					"員林市",
+					"社頭鄉",
+					"永靖鄉",
+					"埔心鄉",
+					"溪湖鎮",
+					"大村鄉",
+					"埔鹽鄉",
+					"田中鎮",
+					"北斗鎮",
+					"田尾鄉",
+					"埤頭鄉",
+					"溪州鄉",
+					"竹塘鄉",
+					"二林鎮",
+					"大城鄉",
+					"芳苑鄉",
+					"二水鄉",
+				],
+				南投縣: [
+					"南投市",
+					"中寮鄉",
+					"草屯鎮",
+					"國姓鄉",
+					"埔里鎮",
+					"仁愛鄉",
+					"名間鄉",
+					"集集鎮",
+					"水里鄉",
+					"魚池鄉",
+					"信義鄉",
+					"竹山鎮",
+					"鹿谷鄉",
+				],
+				雲林縣: [
+					"斗六市",
+					"斗南鎮",
+					"虎尾鎮",
+					"西螺鎮",
+					"土庫鎮",
+					"北港鎮",
+					"古坑鄉",
+					"大埤鄉",
+					"莿桐鄉",
+					"林內鄉",
+					"二崙鄉",
+					"崙背鄉",
+					"麥寮鄉",
+					"東勢鄉",
+					"褒忠鄉",
+					"台西鄉",
+					"元長鄉",
+					"四湖鄉",
+					"口湖鄉",
+					"水林鄉",
+				],
+				嘉義縣: [
+					"太保市",
+					"朴子市",
+					"布袋鎮",
+					"大林鎮",
+					"民雄鄉",
+					"溪口鄉",
+					"新港鄉",
+					"六腳鄉",
+					"東石鄉",
+					"義竹鄉",
+					"鹿草鄉",
+					"水上鄉",
+					"中埔鄉",
+					"竹崎鄉",
+					"梅山鄉",
+					"番路鄉",
+					"大埔鄉",
+					"阿里山鄉",
+				],
+				屏東縣: [
+					"屏東市",
+					"三地門鄉",
+					"霧台鄉",
+					"瑪家鄉",
+					"九如鄉",
+					"里港鄉",
+					"高樹鄉",
+					"鹽埔鄉",
+					"長治鄉",
+					"麟洛鄉",
+					"竹田鄉",
+					"內埔鄉",
+					"萬丹鄉",
+					"潮州鎮",
+					"泰武鄉",
+					"來義鄉",
+					"萬巒鄉",
+					"崁頂鄉",
+					"新埤鄉",
+					"南州鄉",
+					"林邊鄉",
+					"東港鎮",
+					"琉球鄉",
+					"佳冬鄉",
+					"新園鄉",
+					"枋寮鄉",
+					"枋山鄉",
+					"春日鄉",
+					"獅子鄉",
+					"車城鄉",
+					"牡丹鄉",
+					"恆春鎮",
+					"滿州鄉",
+				],
+				宜蘭縣: [
+					"宜蘭市",
+					"羅東鎮",
+					"蘇澳鎮",
+					"頭城鎮",
+					"礁溪鄉",
+					"壯圍鄉",
+					"員山鄉",
+					"冬山鄉",
+					"五結鄉",
+					"三星鄉",
+					"大同鄉",
+					"南澳鄉",
+				],
+				花蓮縣: [
+					"花蓮市",
+					"鳳林鎮",
+					"玉里鎮",
+					"新城鄉",
+					"吉安鄉",
+					"壽豐鄉",
+					"光復鄉",
+					"豐濱鄉",
+					"瑞穗鄉",
+					"富里鄉",
+					"秀林鄉",
+					"萬榮鄉",
+					"卓溪鄉",
+				],
+				台東縣: [
+					"台東市",
+					"成功鎮",
+					"關山鎮",
+					"卑南鄉",
+					"鹿野鄉",
+					"池上鄉",
+					"東河鄉",
+					"長濱鄉",
+					"太麻里鄉",
+					"大武鄉",
+					"綠島鄉",
+					"海端鄉",
+					"延平鄉",
+					"金峰鄉",
+					"達仁鄉",
+					"蘭嶼鄉",
+				],
+				澎湖縣: [
+					"馬公市",
+					"湖西鄉",
+					"白沙鄉",
+					"西嶼鄉",
+					"望安鄉",
+					"七美鄉",
+				],
+				金門縣: [
+					"金城鎮",
+					"金沙鎮",
+					"金湖鎮",
+					"金寧鄉",
+					"烈嶼鄉",
+					"烏坵鄉",
+				],
+				連江縣: ["南竿鄉", "北竿鄉", "莒光鄉", "東引鄉"],
+			};
+
+			const DEFAULT_SHIPPING_OPTIONS = [
+				"自送",
+				"自取",
+				"華誠(小)",
+				"華誠(中)",
+				"華誠(大)",
+				"D.Y.",
+				"D",
+				"東宜",
+				"大粲",
+			];
+			const STORAGE_KEY = "quicknote-state-v2";
+			const LEGACY_STORAGE_KEY = "quicknote-state-v1";
+			const HANDLE_DB_NAME = "quicknote-file-handles";
+			const HANDLE_STORE_NAME = "handles";
+			const HANDLE_KEY = "primary-data-file";
+
+			const { createApp, reactive, ref, computed, watch, nextTick } = Vue;
+
+			function createDefaultState() {
+				return {
+					shippingOptions: [...DEFAULT_SHIPPING_OPTIONS],
+					records: [],
+				};
+			}
+
+			function uniqueTrimmedList(values, fallback = []) {
+				const source = Array.isArray(values) ? values : fallback;
+				return [
+					...new Set(
+						source
+							.map((item) => String(item ?? "").trim())
+							.filter(Boolean),
+					),
+				];
+			}
+
+			function normalizeDateValue(value) {
+				return typeof value === "string" &&
+					/^\d{4}-\d{2}-\d{2}$/.test(value.trim())
+					? value.trim()
+					: "";
+			}
+
+			function isValidDate(value) {
+				return !Number.isNaN(new Date(value).getTime());
+			}
+
+			function createId() {
+				return window.crypto &&
+					typeof window.crypto.randomUUID === "function"
+					? window.crypto.randomUUID()
+					: `id-${Date.now()}-${Math.random().toString(36).slice(2)}`;
+			}
+
+			function normalizeRecord(record) {
+				if (!record || typeof record !== "object") return null;
+				const name = String(record.name ?? "").trim();
+				const city = String(record.city ?? "").trim();
+				const district = String(record.district ?? "").trim();
+				if (!name) return null;
+				const createdAt = isValidDate(record.createdAt)
+					? record.createdAt
+					: new Date().toISOString();
+				const updatedAt =
+					record.updatedAt && isValidDate(record.updatedAt)
+						? record.updatedAt
+						: createdAt;
+				return {
+					id: String(record.id ?? createId()),
+					name,
+					deliveryDate: normalizeDateValue(record.deliveryDate),
+					item: String(record.item ?? "").trim(),
+					city,
+					district,
+					shipping: uniqueTrimmedList(record.shipping),
+					note: String(record.note ?? "").trim(),
+					createdAt,
+					updatedAt,
+				};
+			}
+
+			function normalizeState(raw) {
+				const next = createDefaultState();
+				next.shippingOptions = uniqueTrimmedList(
+					raw?.shippingOptions,
+					DEFAULT_SHIPPING_OPTIONS,
+				);
+				next.records = Array.isArray(raw?.records)
+					? raw.records
+							.map(normalizeRecord)
+							.filter(Boolean)
+							.sort(
+								(a, b) =>
+									new Date(b.updatedAt) -
+									new Date(a.updatedAt),
+							)
+					: [];
+				return next;
+			}
+
+			function loadInitialState() {
+				try {
+					const cached =
+						localStorage.getItem(STORAGE_KEY) ||
+						localStorage.getItem(LEGACY_STORAGE_KEY);
+					return cached
+						? normalizeState(JSON.parse(cached))
+						: createDefaultState();
+				} catch {
+					return createDefaultState();
+				}
+			}
+
+			function supportsFileSystemAccess() {
+				return (
+					typeof window.showOpenFilePicker === "function" &&
+					typeof window.showSaveFilePicker === "function"
+				);
+			}
+
+			function formatDateTime(value) {
+				const date = new Date(value);
+				return Number.isNaN(date.getTime())
+					? "時間格式錯誤"
+					: new Intl.DateTimeFormat("zh-TW", {
+							year: "numeric",
+							month: "2-digit",
+							day: "2-digit",
+							hour: "2-digit",
+							minute: "2-digit",
+						}).format(date);
+			}
+
+			function formatDeliveryDate(value) {
+				if (!value) return "";
+				const date = new Date(`${value}T00:00:00`);
+				return Number.isNaN(date.getTime())
+					? value
+					: new Intl.DateTimeFormat("zh-TW", {
+							year: "numeric",
+							month: "2-digit",
+							day: "2-digit",
+						}).format(date);
+			}
+
+			async function copyText(text) {
+				if (navigator.clipboard?.writeText) {
+					await navigator.clipboard.writeText(text);
+					return;
+				}
+				const textarea = document.createElement("textarea");
+				textarea.value = text;
+				textarea.setAttribute("readonly", "");
+				textarea.style.position = "fixed";
+				textarea.style.opacity = "0";
+				document.body.append(textarea);
+				textarea.select();
+				const copied = document.execCommand("copy");
+				textarea.remove();
+				if (!copied) throw new Error("copy failed");
+			}
+
+			function hasUpdated(record) {
+				return (
+					Boolean(record?.updatedAt) &&
+					record.updatedAt !== record.createdAt
+				);
+			}
+
+			async function verifyFilePermission(handle, writable) {
+				const options = writable ? { mode: "readwrite" } : {};
+				if (
+					typeof handle.queryPermission === "function" &&
+					(await handle.queryPermission(options)) === "granted"
+				)
+					return true;
+				if (typeof handle.requestPermission === "function")
+					return (
+						(await handle.requestPermission(options)) === "granted"
+					);
+				return true;
+			}
+
+			async function writeToDataFile(handle, state) {
+				const writable = await handle.createWritable();
+				await writable.write(
+					JSON.stringify(
+						{
+							shippingOptions: state.shippingOptions,
+							records: state.records,
+						},
+						null,
+						2,
+					),
+				);
+				await writable.close();
+			}
+
+			async function readDataFile(handle) {
+				const file = await handle.getFile();
+				const text = await file.text();
+				return text.trim() ? JSON.parse(text) : createDefaultState();
+			}
+
+			function openDb() {
+				return new Promise((resolve, reject) => {
+					const request = indexedDB.open(HANDLE_DB_NAME, 1);
+					request.addEventListener("upgradeneeded", () =>
+						request.result.createObjectStore(HANDLE_STORE_NAME),
+					);
+					request.addEventListener("success", () =>
+						resolve(request.result),
+					);
+					request.addEventListener("error", () =>
+						reject(request.error),
+					);
+				});
+			}
+
+			async function storeFileHandle(handle) {
+				const db = await openDb();
+				await new Promise((resolve, reject) => {
+					const transaction = db.transaction(
+						HANDLE_STORE_NAME,
+						"readwrite",
+					);
+					transaction
+						.objectStore(HANDLE_STORE_NAME)
+						.put(handle, HANDLE_KEY);
+					transaction.addEventListener("complete", resolve);
+					transaction.addEventListener("error", () =>
+						reject(transaction.error),
+					);
+				});
+				db.close();
+			}
+
+			async function getStoredFileHandle() {
+				try {
+					const db = await openDb();
+					const handle = await new Promise((resolve, reject) => {
+						const transaction = db.transaction(
+							HANDLE_STORE_NAME,
+							"readonly",
+						);
+						const request = transaction
+							.objectStore(HANDLE_STORE_NAME)
+							.get(HANDLE_KEY);
+						request.addEventListener("success", () =>
+							resolve(request.result ?? null),
+						);
+						request.addEventListener("error", () =>
+							reject(request.error),
+						);
+					});
+					db.close();
+					return handle;
+				} catch {
+					return null;
+				}
+			}
+
+			const app = createApp({
+				setup() {
+					const state = reactive(loadInitialState());
+					const fileHandle = ref(null);
+					const searchQuery = ref("");
+					const showSettings = ref(false);
+					const newShippingOption = ref("");
+					const editingShippingOption = ref("");
+					const shippingOptionDraft = ref("");
+					const importInput = ref(null);
+					const editingId = ref(null);
+					const isCreating = ref(false);
+					const selectionMode = ref(false);
+					const selectedRecordIds = ref([]);
+					const statusMessage = ref("");
+					const statusTone = ref("");
+					const topConfirm = reactive({
+						visible: false,
+						title: "",
+						message: "",
+						confirmText: "確認",
+						cancelText: "取消",
+						tone: "danger",
+					});
+					const topNotice = reactive({
+						visible: false,
+						title: "提醒",
+						message: "",
+						tone: "warn",
+					});
+					const editorForm = reactive(createEmptyForm());
+					const editorErrors = reactive({ name: false });
+					const editorSnapshot = ref("");
+					const cityOptions = Object.keys(DISTRICTS);
+					let confirmResolver = null;
+					let noticeTimer = 0;
+
+					const districtOptions = computed(() =>
+						editorForm.city
+							? (DISTRICTS[editorForm.city] ?? [])
+							: [],
+					);
+					const filteredRecords = computed(() => {
+						const query = searchQuery.value.trim().toLowerCase();
+						if (!query) return [...state.records];
+						return state.records.filter((record) =>
+							[
+								record.name,
+								record.deliveryDate,
+								formatDeliveryDate(record.deliveryDate),
+								record.item,
+								`${record.city}${record.district}`,
+								`${record.city} ${record.district}`,
+								record.shipping.join(" "),
+								record.note,
+							]
+								.join("\n")
+								.toLowerCase()
+								.includes(query),
+						);
+					});
+					const resultsMeta = computed(() => {
+						if (!state.records.length) return "尚未建立任何紀錄";
+						if (!filteredRecords.value.length)
+							return `搜尋不到符合條件的資料，目前總共有 ${state.records.length} 筆紀錄`;
+						return `共顯示 ${filteredRecords.value.length} / ${state.records.length} 筆紀錄`;
+					});
+					const allVisibleSelected = computed(
+						() =>
+							Boolean(filteredRecords.value.length) &&
+							filteredRecords.value.every((record) =>
+								selectedRecordIds.value.includes(record.id),
+							),
+					);
+
+					watch(
+						() => editorForm.city,
+						(city) => {
+							if (
+								!city ||
+								!(DISTRICTS[city] ?? []).includes(
+									editorForm.district,
+								)
+							)
+								editorForm.district = "";
+						},
+					);
+
+					watch(
+						() => editorForm.name,
+						(name) => {
+							if (name.trim()) editorErrors.name = false;
+						},
+					);
+
+					function createEmptyForm() {
+						return {
+							name: "",
+							deliveryDate: "",
+							item: "",
+							city: "",
+							district: "",
+							shipping: [],
+							note: "",
+						};
+					}
+
+					function setStatus(message, tone = "") {
+						statusMessage.value = message;
+						statusTone.value = tone;
+					}
+
+					function resetEditorErrors() {
+						editorErrors.name = false;
+					}
+
+					function showTopNotice(
+						message,
+						tone = "warn",
+						title = "提醒",
+					) {
+						window.clearTimeout(noticeTimer);
+						topNotice.title = title;
+						topNotice.message = message;
+						topNotice.tone = tone;
+						topNotice.visible = true;
+						noticeTimer = window.setTimeout(() => {
+							topNotice.visible = false;
+						}, 3200);
+					}
+
+					async function copyField(value, label) {
+						const text = String(value ?? "").trim();
+						if (!text) {
+							showTopNotice(`目前沒有可複製的${label}。`, "warn");
+							return;
+						}
+						try {
+							await copyText(text);
+							showTopNotice(`${label}已複製。`, "", "已複製");
+						} catch (error) {
+							console.error(error);
+							showTopNotice(
+								`複製${label}失敗，請再試一次。`,
+								"error",
+								"複製失敗",
+							);
+						}
+					}
+
+					function requestTopConfirm({
+						title = "請確認",
+						message,
+						confirmText = "確認",
+						cancelText = "取消",
+						tone = "danger",
+					}) {
+						if (confirmResolver) confirmResolver(false);
+						topConfirm.title = title;
+						topConfirm.message = message;
+						topConfirm.confirmText = confirmText;
+						topConfirm.cancelText = cancelText;
+						topConfirm.tone = tone;
+						topConfirm.visible = true;
+						nextTick(() =>
+							document
+								.querySelector("[data-top-confirm-button]")
+								?.focus(),
+						);
+						return new Promise((resolve) => {
+							confirmResolver = resolve;
+						});
+					}
+
+					function resolveTopConfirm(accepted) {
+						if (!topConfirm.visible) return;
+						topConfirm.visible = false;
+						const resolver = confirmResolver;
+						confirmResolver = null;
+						resolver?.(accepted);
+					}
+
+					function formSnapshot() {
+						return JSON.stringify({
+							...editorForm,
+							shipping: [...editorForm.shipping].sort(),
+						});
+					}
+
+					function fillEditor(record = null) {
+						resetEditorErrors();
+						Object.assign(
+							editorForm,
+							createEmptyForm(),
+							record
+								? {
+										name: record.name,
+										deliveryDate: record.deliveryDate,
+										item: record.item,
+										city: record.city,
+										district: record.district,
+										shipping: [...record.shipping],
+										note: record.note,
+									}
+								: {},
+						);
+						editorSnapshot.value = formSnapshot();
+					}
+
+					async function discardEditor(force = false) {
+						if (
+							!force &&
+							(isCreating.value || editingId.value) &&
+							formSnapshot() !== editorSnapshot.value
+						) {
+							const accepted = await requestTopConfirm({
+								title: "放棄未儲存內容？",
+								message: "目前有尚未儲存的內容，確定要放棄嗎？",
+								confirmText: "放棄",
+								tone: "danger",
+							});
+							if (!accepted) return false;
+						}
+						isCreating.value = false;
+						editingId.value = null;
+						fillEditor(null);
+						editorSnapshot.value = "";
+						return true;
+					}
+
+					function focusEditor() {
+						nextTick(() =>
+							document
+								.querySelector("[data-editor-autofocus]")
+								?.focus(),
+						);
+					}
+
+					async function startCreate() {
+						if (!(await discardEditor())) return;
+						cancelSelectionMode();
+						fillEditor(null);
+						isCreating.value = true;
+						focusEditor();
+					}
+
+					async function startEdit(record) {
+						if (!(await discardEditor())) return;
+						cancelSelectionMode();
+						fillEditor(record);
+						editingId.value = record.id;
+						focusEditor();
+					}
+
+					async function cancelEditor() {
+						await discardEditor();
+					}
+
+					function validateEditor() {
+						if (!editorForm.name.trim()) {
+							editorErrors.name = true;
+							focusEditor();
+							return false;
+						}
+						resetEditorErrors();
+						return true;
+					}
+
+					function sortRecords() {
+						state.records.sort(
+							(a, b) =>
+								new Date(b.updatedAt) - new Date(a.updatedAt),
+						);
+					}
+
+					function persistLocalState() {
+						localStorage.setItem(
+							STORAGE_KEY,
+							JSON.stringify({
+								shippingOptions: state.shippingOptions,
+								records: state.records,
+							}),
+						);
+					}
+
+					async function persistAfterChange(message) {
+						persistLocalState();
+						if (!fileHandle.value || !supportsFileSystemAccess()) {
+							setStatus(`${message}，已存在瀏覽器暫存。`, "warn");
+							return;
+						}
+						try {
+							const granted = await verifyFilePermission(
+								fileHandle.value,
+								true,
+							);
+							if (!granted)
+								return setStatus(
+									`${message}，桌面檔案尚未授權寫入。`,
+									"warn",
+								);
+							await writeToDataFile(fileHandle.value, state);
+							setStatus(`${message}，已儲存 JSON。`);
+						} catch (error) {
+							console.error(error);
+							setStatus(
+								`${message}，但儲存 JSON 失敗。`,
+								"error",
+							);
+						}
+					}
+
+					async function submitEditor() {
+						if (!validateEditor()) return;
+						const now = new Date().toISOString();
+						const payload = {
+							name: editorForm.name.trim(),
+							deliveryDate: editorForm.deliveryDate,
+							item: editorForm.item.trim(),
+							city: editorForm.city,
+							district: editorForm.district,
+							shipping: uniqueTrimmedList(editorForm.shipping),
+							note: editorForm.note.trim(),
+						};
+						if (editingId.value) {
+							const index = state.records.findIndex(
+								(record) => record.id === editingId.value,
+							);
+							if (index !== -1)
+								state.records[index] = {
+									...state.records[index],
+									...payload,
+									updatedAt: now,
+								};
+							sortRecords();
+							discardEditor(true);
+							await persistAfterChange("已更新紀錄");
+							return;
+						}
+						state.records.unshift({
+							id: createId(),
+							...payload,
+							createdAt: now,
+							updatedAt: now,
+						});
+						sortRecords();
+						discardEditor(true);
+						await persistAfterChange("已新增紀錄");
+					}
+
+					async function deleteRecord(id) {
+						const record = state.records.find(
+							(item) => item.id === id,
+						);
+						if (!record) return;
+						const accepted = await requestTopConfirm({
+							title: "刪除這筆紀錄？",
+							message: `確定要刪除「${record.name}」這筆紀錄嗎？`,
+							confirmText: "刪除",
+							tone: "danger",
+						});
+						if (!accepted) return;
+						state.records = state.records.filter(
+							(item) => item.id !== id,
+						);
+						selectedRecordIds.value =
+							selectedRecordIds.value.filter(
+								(recordId) => recordId !== id,
+							);
+						if (editingId.value === id) await discardEditor(true);
+						await persistAfterChange("已刪除紀錄");
+					}
+
+					async function startSelectionMode() {
+						if (!state.records.length || !(await discardEditor()))
+							return;
+						isCreating.value = false;
+						selectedRecordIds.value = [];
+						selectionMode.value = true;
+					}
+
+					function cancelSelectionMode() {
+						selectionMode.value = false;
+						selectedRecordIds.value = [];
+					}
+
+					function isRecordSelected(id) {
+						return selectedRecordIds.value.includes(id);
+					}
+
+					function toggleRecordSelection(id) {
+						selectedRecordIds.value = isRecordSelected(id)
+							? selectedRecordIds.value.filter(
+									(recordId) => recordId !== id,
+								)
+							: [...selectedRecordIds.value, id];
+					}
+
+					function toggleRecordSelectionFromCard(id) {
+						if (!selectionMode.value) return;
+						toggleRecordSelection(id);
+					}
+
+					function toggleSelectAllVisible() {
+						const visibleIds = filteredRecords.value.map(
+							(record) => record.id,
+						);
+						if (!visibleIds.length) return;
+						if (allVisibleSelected.value) {
+							selectedRecordIds.value =
+								selectedRecordIds.value.filter(
+									(id) => !visibleIds.includes(id),
+								);
+							return;
+						}
+						selectedRecordIds.value = [
+							...new Set([
+								...selectedRecordIds.value,
+								...visibleIds,
+							]),
+						];
+					}
+
+					async function deleteSelectedRecords() {
+						const selectedIds = [...selectedRecordIds.value];
+						if (!selectedIds.length) return;
+						const accepted = await requestTopConfirm({
+							title: "刪除選取紀錄？",
+							message: `確定要刪除已選取的 ${selectedIds.length} 筆紀錄嗎？`,
+							confirmText: "刪除選取",
+							tone: "danger",
+						});
+						if (!accepted) return;
+						const selectedSet = new Set(selectedIds);
+						state.records = state.records.filter(
+							(record) => !selectedSet.has(record.id),
+						);
+						if (selectedSet.has(editingId.value))
+							await discardEditor(true);
+						cancelSelectionMode();
+						await persistAfterChange(
+							`已刪除 ${selectedIds.length} 筆紀錄`,
+						);
+					}
+
+					async function clearAllRecords() {
+						if (!state.records.length) return;
+						const accepted = await requestTopConfirm({
+							title: "清空全部紀錄？",
+							message: "確定要清空全部紀錄嗎？",
+							confirmText: "清空全部",
+							tone: "danger",
+						});
+						if (!accepted) return;
+						state.records = [];
+						await discardEditor(true);
+						cancelSelectionMode();
+						closeSettings();
+						await persistAfterChange("已清空全部紀錄");
+					}
+
+					function clearSearch() {
+						searchQuery.value = "";
+					}
+
+					function openSettings() {
+						showSettings.value = true;
+					}
+
+					function closeSettings() {
+						showSettings.value = false;
+					}
+
+					async function addShippingOption() {
+						const value = newShippingOption.value.trim();
+						if (!value) return;
+						if (state.shippingOptions.includes(value))
+							return showTopNotice(
+								"這個送貨方式已經存在。",
+								"warn",
+							);
+						state.shippingOptions.push(value);
+						state.shippingOptions.sort((a, b) =>
+							a.localeCompare(b, "zh-Hant"),
+						);
+						newShippingOption.value = "";
+						await persistAfterChange("已新增送貨方式");
+					}
+
+					function startRenameShippingOption(option) {
+						editingShippingOption.value = option;
+						shippingOptionDraft.value = option;
+						nextTick(() =>
+							document
+								.querySelector("[data-shipping-edit-input]")
+								?.focus(),
+						);
+					}
+
+					function cancelShippingOptionRename() {
+						editingShippingOption.value = "";
+						shippingOptionDraft.value = "";
+					}
+
+					async function saveShippingOptionRename(option) {
+						const value = shippingOptionDraft.value.trim();
+						if (!value)
+							return showTopNotice(
+								"請先填寫送貨方式名稱。",
+								"warn",
+							);
+						if (value === option)
+							return cancelShippingOptionRename();
+						if (state.shippingOptions.includes(value))
+							return showTopNotice(
+								"這個送貨方式已經存在。",
+								"warn",
+							);
+						state.shippingOptions = state.shippingOptions
+							.map((item) => (item === option ? value : item))
+							.sort((a, b) => a.localeCompare(b, "zh-Hant"));
+						state.records = state.records.map((record) =>
+							record.shipping.includes(option)
+								? {
+										...record,
+										shipping: record.shipping.map((item) =>
+											item === option ? value : item,
+										),
+										updatedAt: new Date().toISOString(),
+									}
+								: record,
+						);
+						editorForm.shipping = editorForm.shipping.map((item) =>
+							item === option ? value : item,
+						);
+						cancelShippingOptionRename();
+						sortRecords();
+						await persistAfterChange("已修改送貨方式");
+					}
+
+					async function deleteShippingOption(option) {
+						const isUsed = state.records.some((record) =>
+							record.shipping.includes(option),
+						);
+						const message = isUsed
+							? `「${option}」已被既有紀錄使用，刪除後會一併移除。確定刪除嗎？`
+							: `確定要刪除「${option}」嗎？`;
+						const accepted = await requestTopConfirm({
+							title: "刪除送貨方式？",
+							message,
+							confirmText: "刪除",
+							tone: "danger",
+						});
+						if (!accepted) return;
+						state.shippingOptions = state.shippingOptions.filter(
+							(item) => item !== option,
+						);
+						state.records = state.records.map((record) =>
+							record.shipping.includes(option)
+								? {
+										...record,
+										shipping: record.shipping.filter(
+											(item) => item !== option,
+										),
+										updatedAt: new Date().toISOString(),
+									}
+								: record,
+						);
+						editorForm.shipping = editorForm.shipping.filter(
+							(item) => item !== option,
+						);
+						if (editingShippingOption.value === option)
+							cancelShippingOptionRename();
+						sortRecords();
+						await persistAfterChange("已刪除送貨方式");
+					}
+
+					async function manualSave() {
+						if (!supportsFileSystemAccess())
+							return exportJsonFile();
+						if (!fileHandle.value) return saveAsDataFile();
+						await writeToDataFile(fileHandle.value, state);
+						setStatus("已儲存 JSON。");
+					}
+
+					async function openDataFile() {
+						if (!supportsFileSystemAccess())
+							return showTopNotice(
+								"目前瀏覽器不支援直接開啟 JSON，請改用下載副本備份資料。",
+								"warn",
+							);
+						if (!(await discardEditor())) return;
+						try {
+							const [handle] = await window.showOpenFilePicker({
+								multiple: false,
+								types: [
+									{
+										description: "JSON",
+										accept: {
+											"application/json": [".json"],
+										},
+									},
+								],
+							});
+							if (!(await verifyFilePermission(handle, false)))
+								return setStatus(
+									"未取得 JSON 讀取權限。",
+									"warn",
+								);
+							const next = normalizeState(
+								await readDataFile(handle),
+							);
+							state.shippingOptions = next.shippingOptions;
+							state.records = next.records;
+							fileHandle.value = handle;
+							await storeFileHandle(handle);
+							persistLocalState();
+							setStatus("已載入 JSON。");
+						} catch (error) {
+							if (error?.name !== "AbortError")
+								setStatus("開啟 JSON 失敗。", "error");
+						}
+					}
+
+					async function saveAsDataFile() {
+						if (!supportsFileSystemAccess())
+							return exportJsonFile();
+						try {
+							const handle = await window.showSaveFilePicker({
+								suggestedName: "quicknote-data.json",
+								types: [
+									{
+										description: "JSON",
+										accept: {
+											"application/json": [".json"],
+										},
+									},
+								],
+							});
+							if (!(await verifyFilePermission(handle, true)))
+								return setStatus(
+									"未取得 JSON 寫入權限。",
+									"warn",
+								);
+							fileHandle.value = handle;
+							await storeFileHandle(handle);
+							await writeToDataFile(handle, state);
+							setStatus("已儲存 JSON。");
+						} catch (error) {
+							if (error?.name !== "AbortError")
+								setStatus("儲存 JSON 失敗。", "error");
+						}
+					}
+
+					function exportJsonFile() {
+						const blob = new Blob(
+							[
+								JSON.stringify(
+									{
+										shippingOptions: state.shippingOptions,
+										records: state.records,
+									},
+									null,
+									2,
+								),
+							],
+							{ type: "application/json" },
+						);
+						const url = URL.createObjectURL(blob);
+						const link = document.createElement("a");
+						link.href = url;
+						link.download = `quicknote-export-${new Date().toISOString().slice(0, 10)}.json`;
+						document.body.append(link);
+						link.click();
+						link.remove();
+						URL.revokeObjectURL(url);
+						setStatus("已下載 JSON 副本。");
+					}
+
+					function openImportDialog() {
+						importInput.value?.click();
+					}
+
+					async function importJsonFile(event) {
+						const file = event.target.files?.[0];
+						if (!file || !(await discardEditor())) return;
+						try {
+							const next = normalizeState(
+								JSON.parse(await file.text()),
+							);
+							state.shippingOptions = next.shippingOptions;
+							state.records = next.records;
+							persistLocalState();
+							await persistAfterChange("已匯入 JSON");
+						} catch {
+							showTopNotice(
+								"匯入失敗，請確認 JSON 格式是否正確。",
+								"error",
+								"匯入失敗",
+							);
+						} finally {
+							event.target.value = "";
+						}
+					}
+
+					nextTick(async () => {
+						if (!supportsFileSystemAccess()) return;
+						const handle = await getStoredFileHandle();
+						if (
+							!handle ||
+							!(await verifyFilePermission(handle, false))
+						)
+							return;
+						try {
+							const next = normalizeState(
+								await readDataFile(handle),
+							);
+							state.shippingOptions = next.shippingOptions;
+							state.records = next.records;
+							fileHandle.value = handle;
+							persistLocalState();
+						} catch {
+							setStatus("自動讀取上次 JSON 失敗。", "warn");
+						}
+					});
+
+					return {
+						state,
+						searchQuery,
+						showSettings,
+						newShippingOption,
+						editingShippingOption,
+						shippingOptionDraft,
+						importInput,
+						editingId,
+						isCreating,
+						selectionMode,
+						selectedRecordIds,
+						statusMessage,
+						statusTone,
+						topConfirm,
+						topNotice,
+						editorForm,
+						editorErrors,
+						cityOptions,
+						districtOptions,
+						filteredRecords,
+						resultsMeta,
+						allVisibleSelected,
+						startCreate,
+						startEdit,
+						cancelEditor,
+						submitEditor,
+						deleteRecord,
+						startSelectionMode,
+						cancelSelectionMode,
+						isRecordSelected,
+						toggleRecordSelection,
+						toggleRecordSelectionFromCard,
+						toggleSelectAllVisible,
+						deleteSelectedRecords,
+						resolveTopConfirm,
+						clearAllRecords,
+						clearSearch,
+						openSettings,
+						closeSettings,
+						addShippingOption,
+						startRenameShippingOption,
+						cancelShippingOptionRename,
+						saveShippingOptionRename,
+						deleteShippingOption,
+						manualSave,
+						openDataFile,
+						saveAsDataFile,
+						exportJsonFile,
+						openImportDialog,
+						importJsonFile,
+						copyField,
+						formatDateTime,
+						formatDeliveryDate,
+						hasUpdated,
+					};
+				},
+			});
+
+			app.component("record-editor", {
+				template: "#record-editor-template",
+				props: {
+					form: { type: Object, required: true },
+					errors: { type: Object, required: true },
+					cityOptions: { type: Array, required: true },
+					districtOptions: { type: Array, required: true },
+					shippingOptions: { type: Array, required: true },
+					mode: { type: String, required: true },
+				},
+				emits: ["save", "cancel", "delete"],
+			});
+
+			app.use(VCalendar.default, { componentPrefix: "V" });
+
+			app.mount("#app");
+		</script>
+	</body>
 </html>
