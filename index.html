@@ -1027,19 +1027,19 @@
 											</button>
 										</div>
 										<div
-											v-if="record.city || record.district"
+											v-if="buildFullAddress(record)"
 											class="copy-field"
 										>
 											<small
-												>{{ record.city }}{{
-												record.district }}</small
+												>{{ buildFullAddress(record)
+												}}</small
 											>
 											<button
 												class="copy-button"
 												type="button"
-												aria-label="複製行政區"
-												title="複製行政區"
-												@click.stop="copyField(`${record.city}${record.district}`, '行政區')"
+												aria-label="複製地址"
+												title="複製地址"
+												@click.stop="copyField(buildFullAddress(record), '地址')"
 												@keydown.enter.stop
 												@keydown.space.stop
 											>
@@ -1524,6 +1524,15 @@
 							</option>
 						</select>
 					</div>
+				</div>
+
+				<div class="field">
+					<label>完整地址</label>
+					<input
+						v-model.trim="form.address"
+						autocomplete="off"
+						placeholder="例如：南京西路 123 號 5 樓"
+					/>
 				</div>
 
 				<fieldset class="field">
@@ -2025,6 +2034,7 @@
 				const name = String(record.name ?? "").trim();
 				const city = String(record.city ?? "").trim();
 				const district = String(record.district ?? "").trim();
+				const address = String(record.address ?? "").trim();
 				if (!name) return null;
 				const createdAt = isValidDate(record.createdAt)
 					? record.createdAt
@@ -2040,11 +2050,19 @@
 					item: String(record.item ?? "").trim(),
 					city,
 					district,
+					address,
 					shipping: uniqueTrimmedList(record.shipping),
 					note: String(record.note ?? "").trim(),
 					createdAt,
 					updatedAt,
 				};
+			}
+
+			function buildFullAddress(record) {
+				return [record?.city, record?.district, record?.address]
+					.map((value) => String(value ?? "").trim())
+					.filter(Boolean)
+					.join("");
 			}
 
 			function normalizeState(raw) {
@@ -2279,6 +2297,8 @@
 								record.deliveryDate,
 								formatDeliveryDate(record.deliveryDate),
 								record.item,
+								record.address,
+								buildFullAddress(record),
 								`${record.city}${record.district}`,
 								`${record.city} ${record.district}`,
 								record.shipping.join(" "),
@@ -2330,6 +2350,7 @@
 							item: "",
 							city: "",
 							district: "",
+							address: "",
 							shipping: [],
 							note: "",
 						};
@@ -2429,6 +2450,7 @@
 										item: record.item,
 										city: record.city,
 										district: record.district,
+										address: record.address,
 										shipping: [...record.shipping],
 										note: record.note,
 									}
@@ -2549,6 +2571,7 @@
 							item: editorForm.item.trim(),
 							city: editorForm.city,
 							district: editorForm.district,
+							address: editorForm.address.trim(),
 							shipping: uniqueTrimmedList(editorForm.shipping),
 							note: editorForm.note.trim(),
 						};
@@ -3006,6 +3029,7 @@
 						openImportDialog,
 						importJsonFile,
 						copyField,
+						buildFullAddress,
 						formatDateTime,
 						formatDeliveryDate,
 						hasUpdated,
