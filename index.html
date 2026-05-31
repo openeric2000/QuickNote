@@ -360,13 +360,42 @@
 				position: relative;
 			}
 
+			.date-picker-toggle {
+				position: absolute;
+				top: 50%;
+				right: 0.6rem;
+				width: 2.5rem;
+				height: 2.5rem;
+				border: 0;
+				border-radius: 999px;
+				padding: 0;
+				background: transparent;
+				color: var(--text-soft);
+				transform: translateY(-50%);
+				display: inline-grid;
+				place-items: center;
+				transition:
+					background 160ms ease,
+					color 160ms ease;
+			}
+
+			.date-picker-toggle:hover {
+				background: rgba(47, 118, 111, 0.1);
+				color: var(--secondary);
+			}
+
+			.date-picker-toggle:focus-visible {
+				outline: 3px solid rgba(47, 118, 111, 0.22);
+				outline-offset: 2px;
+			}
+
 			.date-input-icon {
 				position: absolute;
 				top: 50%;
-				right: 1rem;
+				left: 50%;
 				width: 1.1rem;
 				height: 1.1rem;
-				transform: translateY(-50%);
+				transform: translate(-50%, -50%);
 				color: var(--text-soft);
 				stroke: currentColor;
 				fill: none;
@@ -377,7 +406,7 @@
 			}
 
 			.field .date-input {
-				cursor: pointer;
+				cursor: text;
 				padding-right: 3rem;
 			}
 
@@ -1449,34 +1478,46 @@
 						<label>出貨日期</label>
 						<v-date-picker
 							v-model.string="form.deliveryDate"
-							:masks="{ input: 'YYYY / MM / DD', modelValue: 'YYYY-MM-DD' }"
-							:popover="{ visibility: 'click', placement: 'bottom-start' }"
+							:masks="{ input: 'YYYY/MM/DD', modelValue: 'YYYY-MM-DD' }"
+							:popover="false"
+							:input-debounce="250"
 						>
-							<template #default="{ inputValue, inputEvents }">
+							<template #default="{ togglePopover }">
 								<div class="date-input-wrap">
 									<input
 										class="date-input"
-										:value="inputValue"
-										v-on="inputEvents"
-										readonly
-										placeholder="請選擇出貨日期"
+										:value="deliveryDateInputValue"
+										inputmode="numeric"
+										autocomplete="off"
+										spellcheck="false"
+										placeholder="例如：2026/06/18"
+										@focus="startDeliveryDateTyping"
+										@input="handleDeliveryDateInput"
+										@blur="finishDeliveryDateTyping"
 									/>
-									<svg
-										class="date-input-icon"
-										viewBox="0 0 24 24"
-										aria-hidden="true"
+									<button
+										class="date-picker-toggle"
+										type="button"
+										aria-label="開啟出貨日期選擇器"
+										@click="togglePopover({ placement: 'bottom-start' })"
 									>
-										<path d="M8 2v4"></path>
-										<path d="M16 2v4"></path>
-										<path d="M3.5 9h17"></path>
-										<rect
-											x="4"
-											y="5"
-											width="16"
-											height="16"
-											rx="2"
-										></rect>
-									</svg>
+										<svg
+											class="date-input-icon"
+											viewBox="0 0 24 24"
+											aria-hidden="true"
+										>
+											<path d="M8 2v4"></path>
+											<path d="M16 2v4"></path>
+											<path d="M3.5 9h17"></path>
+											<rect
+												x="4"
+												y="5"
+												width="16"
+												height="16"
+												rx="2"
+											></rect>
+										</svg>
+									</button>
 								</div>
 							</template>
 						</v-date-picker>
@@ -2127,6 +2168,45 @@
 							month: "2-digit",
 							day: "2-digit",
 						}).format(date);
+			}
+
+			function formatDeliveryDateInput(value) {
+				const normalized = normalizeDateValue(value);
+				if (normalized) return normalized.replace(/-/g, "/");
+
+				const digits = String(value ?? "")
+					.replace(/\D/g, "")
+					.slice(0, 8);
+				if (!digits) return "";
+				if (digits.length <= 4) return digits;
+				if (digits.length <= 6) {
+					return `${digits.slice(0, 4)}/${digits.slice(4)}`;
+				}
+				return `${digits.slice(0, 4)}/${digits.slice(4, 6)}/${digits.slice(6)}`;
+			}
+
+			function normalizeManualDeliveryDate(value) {
+				const digits = String(value ?? "")
+					.replace(/\D/g, "")
+					.slice(0, 8);
+				if (!digits || digits.length !== 8) return "";
+
+				const year = digits.slice(0, 4);
+				const month = digits.slice(4, 6);
+				const day = digits.slice(6, 8);
+				const normalized = `${year}-${month}-${day}`;
+				const date = new Date(`${normalized}T00:00:00`);
+
+				if (Number.isNaN(date.getTime())) return "";
+				if (
+					date.getFullYear() !== Number(year) ||
+					date.getMonth() + 1 !== Number(month) ||
+					date.getDate() !== Number(day)
+				) {
+					return "";
+				}
+
+				return normalized;
 			}
 
 			async function copyText(text) {
@@ -3039,6 +3119,14 @@
 
 			app.component("record-editor", {
 				template: "#record-editor-template",
+				data() {
+					return {
+						deliveryDateInputValue: formatDeliveryDateInput(
+							this.form.deliveryDate,
+						),
+						isEditingDeliveryDate: false,
+					};
+				},
 				props: {
 					form: { type: Object, required: true },
 					errors: { type: Object, required: true },
@@ -3046,6 +3134,55 @@
 					districtOptions: { type: Array, required: true },
 					shippingOptions: { type: Array, required: true },
 					mode: { type: String, required: true },
+				},
+				watch: {
+					"form.deliveryDate": {
+						handler(value) {
+							if (this.isEditingDeliveryDate) return;
+							this.deliveryDateInputValue =
+								formatDeliveryDateInput(value);
+						},
+						immediate: true,
+					},
+				},
+				methods: {
+					startDeliveryDateTyping() {
+						this.isEditingDeliveryDate = true;
+					},
+					handleDeliveryDateInput(event) {
+						const formatted = formatDeliveryDateInput(
+							event.target.value,
+						);
+						this.deliveryDateInputValue = formatted;
+						this.form.deliveryDate =
+							normalizeManualDeliveryDate(formatted);
+					},
+					finishDeliveryDateTyping() {
+						const hasTypedValue = Boolean(
+							this.deliveryDateInputValue.replace(/\D/g, ""),
+						);
+						const normalized = normalizeManualDeliveryDate(
+							this.deliveryDateInputValue,
+						);
+
+						this.isEditingDeliveryDate = false;
+
+						if (!hasTypedValue) {
+							this.form.deliveryDate = "";
+							this.deliveryDateInputValue = "";
+							return;
+						}
+
+						if (!normalized) {
+							this.deliveryDateInputValue =
+								formatDeliveryDateInput(this.form.deliveryDate);
+							return;
+						}
+
+						this.form.deliveryDate = normalized;
+						this.deliveryDateInputValue =
+							formatDeliveryDateInput(normalized);
+					},
 				},
 				emits: ["save", "cancel", "delete"],
 			});
